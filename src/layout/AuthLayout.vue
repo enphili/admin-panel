@@ -4,7 +4,14 @@
       <fieldset>
         <legend class="form-title">Вход в панель редактирования</legend>
           <label for="name" class="form-label">Логин
-            <input id="name" class="form-input" v-model="username" placeholder="укажите ваш логин" />
+            <input
+              id="name"
+              type="text"
+              class="form-input"
+              v-model="username"
+              placeholder="укажите ваш логин"
+            />
+            <p class="validate-text">{{ loginValidateMessage }}</p>
           </label>
 
           <label for="password" class="form-label password-label">Пароль
@@ -23,6 +30,7 @@
               @click="isPassword = !isPassword"
               alt="переключение видимости пароля"
             />
+            <p class="validate-text">{{ passwordValidateMessage }}</p>
           </label>
         <AppButton
           text="Войти"
@@ -30,41 +38,73 @@
         />
       </fieldset>
     </form>
+    <Transition name="fade">
+      <p v-if="idDone" class="form-message done-message">{{ done }}</p>
+    </Transition>
+    <Transition name="fade">
+      <p v-if="isFall"  class="form-message fall-message">{{ fall }}</p>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import AppButton from '../components/ui/AppButton.vue'
-import {computed, ref} from 'vue'
+import {computed, ref, watch} from 'vue'
+import {useLogin} from '../use/auth/useLogin.ts'
+import {useValidation} from '../use/auth/useValidation.ts'
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
 }>()
 
+// Локальные состояния
 const username = ref('')
 const password = ref('')
 const isPassword = ref(true)
+const isFall = ref(false)
+const fall = ref('Ошибка авторизации')
+const done = ref('Вы успешно авторизовались')
+const idDone = ref(false)
+
+// Валидационные сообщения
+const loginValidateMessage = ref('')
+const passwordValidateMessage = ref('')
+
+// Обновляем валидацию при изменении полей
+watch([username, password], ([newUsername, newPassword]) => {
+  const validation = useValidation(newUsername, newPassword)
+  loginValidateMessage.value = validation.loginValidateMessage
+  passwordValidateMessage.value = validation.passwordValidateMessage
+})
 
 const img = computed(() => isPassword.value ? '/image/eye.svg' : '/image/eye-off.svg')
 
-// Логика для аутентификации (пример)
-const login = () => {
-  if (username.value === 'admin' && password.value === 'admin') {
-    // В данном примере мы просто меняем состояние на успешную аутентификацию
-    // В реальной жизни сюда добавьте вашу логику аутентификации
-    // и эмитим событие в родительский компонент (App.vue)
-    emit('authenticated', true) // передаем true при успешной аутентификации
-  } else {
-    alert('Неверные данные для входа')
+// Функция входа
+const login = async () => {
+  const result = await useLogin(username.value, password.value, emit)
+
+  // Обновляем состояние компонента в зависимости от результата
+  loginValidateMessage.value = result.loginValidateMessage
+  passwordValidateMessage.value = result.passwordValidateMessage
+
+  if (result.isFall) {
+    fall.value = result.fall
+    isFall.value = true
+    setTimeout(() => {
+      isFall.value = false
+    }, 2500)
+  }
+
+  if (result.isLoginValid && result.isPasswordValid) {
+    idDone.value = true; // Успешная авторизация
   }
 }
-
 
 
 </script>
 
 
-<style scoped>
+<style>
 .form-wrapper {
   position: absolute;
   top: calc(50% - 504px / 2);
@@ -88,9 +128,9 @@ const login = () => {
   justify-content: flex-start;
 }
 .form-label {
+  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
-  margin-bottom: 5px;
   font-size: 12px;
   color: var(--accent);
 }
@@ -99,7 +139,6 @@ const login = () => {
 }
 .form-input {
   height: 30px;
-  margin-bottom: 24px;
   padding-right: 30px;
   background: transparent;
   border: none;
@@ -114,5 +153,33 @@ const login = () => {
   right: 5px;
   cursor: pointer;
 }
+.validate-text {
+  height: 28px;
+  font-size: 11px;
+  color: rgb(173, 85, 85);
+}
+.form-message {
+   margin-top: 24px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 60px;
+   border-radius: 5px;
+   color: white;
+ }
+.done-message {
+  background: rgb(88, 173, 85);
+}
+.fall-message {
+  background: rgb(173, 85, 85);
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
 
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
