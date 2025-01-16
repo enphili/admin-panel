@@ -11,7 +11,7 @@
               v-model="username"
               placeholder="укажите ваш логин"
             />
-            <p class="validate-text">{{ loginValidateMessage }}</p>
+            <span class="validate-text">{{ loginValidateMessage }}</span>
           </label>
 
           <label for="password" class="form-label password-label">Пароль
@@ -30,7 +30,7 @@
               @click="isPassword = !isPassword"
               alt="переключение видимости пароля"
             />
-            <p class="validate-text">{{ passwordValidateMessage }}</p>
+            <span class="validate-text">{{ passwordValidateMessage }}</span>
           </label>
         <AppButton
           text="Войти"
@@ -83,23 +83,18 @@ const img = computed(() => isPassword.value ? '/image/eye.svg' : '/image/eye-off
 const login = async () => {
   const result = await useLogin(username.value, password.value, emit)
 
-  // Обновляем состояние компонента в зависимости от результата
-  loginValidateMessage.value = result.loginValidateMessage
-  passwordValidateMessage.value = result.passwordValidateMessage
-
   if (result.isFall) {
     fall.value = result.fall
     isFall.value = true
+    idDone.value = false
     setTimeout(() => {
       isFall.value = false
     }, 2500)
-  }
-
-  if (result.isLoginValid && result.isPasswordValid) {
-    idDone.value = true; // Успешная авторизация
+  } else {
+    idDone.value = true
+    isFall.value = false
   }
 }
-
 
 </script>
 

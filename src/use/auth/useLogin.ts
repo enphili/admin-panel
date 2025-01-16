@@ -48,21 +48,15 @@ export const useLogin = async <T extends (event: 'authenticated', payload: boole
       emit('authenticated', true) // передаем true при успешной аутентификации
       return {
         isFall: false,
+        idDone: true,
         fall: '',
-        loginValidateMessage: '',
-        passwordValidateMessage: '',
-        isLoginValid: true,
-        isPasswordValid: true,
       }
     } else {
       // Ошибка авторизации
       return {
         isFall: true,
+        idDone: false,
         fall: data.message || 'Неверные данные для входа',
-        loginValidateMessage: '',
-        passwordValidateMessage: '',
-        isLoginValid: true,
-        isPasswordValid: true,
       }
     }
   }
@@ -70,11 +64,8 @@ export const useLogin = async <T extends (event: 'authenticated', payload: boole
     // Ошибка сети или сервера
     return {
       isFall: true,
+      idDone: false,
       fall: 'Ошибка подключения к серверу',
-      loginValidateMessage: '',
-      passwordValidateMessage: '',
-      isLoginValid: true,
-      isPasswordValid: true,
     }
   }
 }
