@@ -51,8 +51,8 @@
 <script setup lang="ts">
 import AppButton from '../components/ui/AppButton.vue'
 import {computed, ref, watch} from 'vue'
-import {useLogin} from '../use/auth/useLogin.ts'
 import {useValidation} from '../use/auth/useValidation.ts'
+import {AuthService} from '../auth/AuthService.ts'
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
@@ -72,6 +72,7 @@ const isLoading = ref(false)
 const loginValidateMessage = ref('')
 const passwordValidateMessage = ref('')
 
+
 // Обновляем валидацию при изменении полей
 watch([username, password], ([newUsername, newPassword]) => {
   const validation = useValidation(newUsername, newPassword)
@@ -84,42 +85,38 @@ const img = computed(() => isPassword.value ? '/image/eye.svg' : '/image/eye-off
 // Функция входа
 const login = async () => {
   isLoading.value = true
+  const authService = new AuthService(username.value, password.value, emit)
+
   try {
-    const result = await useLogin(username.value, password.value, emit)
+    const result = await authService.loginToServer()
 
     if (result.isValidationError) {
-      // Если ошибка валидации, показываем сообщения под полями ввода
       loginValidateMessage.value = result.loginValidateMessage
       passwordValidateMessage.value = result.passwordValidateMessage
       isFall.value = false
       idDone.value = false
-    }
-    else if (result.isFall) {
-      // Если ошибка авторизации на сервере
+    } else if (result.isFall) {
       fall.value = result.fall
       isFall.value = true
       idDone.value = false
       setTimeout(() => {
         isFall.value = false
       }, 2500)
-    }
-    else {
-      // Успешная авторизация
+    } else {
       idDone.value = true
       setTimeout(() => {
         idDone.value = false
       }, 2500)
       isFall.value = false
     }
-  }
-  catch (error) {console.error(error)}
-  finally {
+  } catch (error) {
+    console.error(error)
+  } finally {
     isLoading.value = false
   }
 }
 
 </script>
-
 
 <style>
 .form-wrapper {
