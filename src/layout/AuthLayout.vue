@@ -35,6 +35,7 @@
         <AppButton
           text="Войти"
           type="submit"
+          :isLoading="isLoading"
         />
       </fieldset>
     </form>
@@ -65,6 +66,7 @@ const isFall = ref(false)
 const fall = ref('Ошибка авторизации')
 const done = ref('Вы успешно авторизовались')
 const idDone = ref(false)
+const isLoading = ref(false)
 
 // Валидационные сообщения
 const loginValidateMessage = ref('')
@@ -81,18 +83,38 @@ const img = computed(() => isPassword.value ? '/image/eye.svg' : '/image/eye-off
 
 // Функция входа
 const login = async () => {
-  const result = await useLogin(username.value, password.value, emit)
+  isLoading.value = true
+  try {
+    const result = await useLogin(username.value, password.value, emit)
 
-  if (result.isFall) {
-    fall.value = result.fall
-    isFall.value = true
-    idDone.value = false
-    setTimeout(() => {
+    if (result.isValidationError) {
+      // Если ошибка валидации, показываем сообщения под полями ввода
+      loginValidateMessage.value = result.loginValidateMessage
+      passwordValidateMessage.value = result.passwordValidateMessage
       isFall.value = false
-    }, 2500)
-  } else {
-    idDone.value = true
-    isFall.value = false
+      idDone.value = false
+    }
+    else if (result.isFall) {
+      // Если ошибка авторизации на сервере
+      fall.value = result.fall
+      isFall.value = true
+      idDone.value = false
+      setTimeout(() => {
+        isFall.value = false
+      }, 2500)
+    }
+    else {
+      // Успешная авторизация
+      idDone.value = true
+      setTimeout(() => {
+        idDone.value = false
+      }, 2500)
+      isFall.value = false
+    }
+  }
+  catch (error) {console.error(error)}
+  finally {
+    isLoading.value = false
   }
 }
 

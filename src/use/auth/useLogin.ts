@@ -15,10 +15,10 @@ export const useLogin = async <T extends (event: 'authenticated', payload: boole
     passwordValidateMessage
   } = useValidation(login, password)
   
+  // Проверяем, прошла ли валидация
   if (!isLoginValid && !isPasswordValid) {
-    // Возвращаем результаты валидации, если она не пройдена
     return {
-      isFall: false, // Ошибок авторизации нет, это ошибка валидации
+      isValidationError: true, // Флаг ошибки валидации
       fall: '',
       loginValidateMessage,
       passwordValidateMessage,
@@ -47,25 +47,31 @@ export const useLogin = async <T extends (event: 'authenticated', payload: boole
       // Успешная авторизация
       emit('authenticated', true) // передаем true при успешной аутентификации
       return {
+        isValidationError: false,
         isFall: false,
-        idDone: true,
         fall: '',
+        loginValidateMessage,
+        passwordValidateMessage,
       }
     } else {
       // Ошибка авторизации
       return {
+        isValidationError: false,
         isFall: true,
-        idDone: false,
         fall: data.message || 'Неверные данные для входа',
+        loginValidateMessage,
+        passwordValidateMessage,
       }
     }
   }
   catch (error) {
     // Ошибка сети или сервера
     return {
+      isValidationError: false,
       isFall: true,
-      idDone: false,
       fall: 'Ошибка подключения к серверу',
+      loginValidateMessage,
+      passwordValidateMessage,
     }
   }
 }
