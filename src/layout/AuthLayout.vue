@@ -1,8 +1,9 @@
 <template>
-  <div class="form-wrapper">
-    <form class="login-form" @submit.prevent="login">
-      <fieldset>
-        <legend class="form-title">Вход в панель редактирования</legend>
+  <div class="auth-layout">
+    <div class="form-wrapper">
+      <form class="login-form" @submit.prevent="login">
+        <fieldset>
+          <legend class="form-title">Вход в панель редактирования</legend>
           <label for="name" class="form-label">Логин
             <input
               id="name"
@@ -32,19 +33,21 @@
             />
             <span class="validate-text">{{ passwordValidateMessage }}</span>
           </label>
-        <AppButton
-          text="Войти"
-          type="submit"
-          :isLoading="isLoading"
-        />
-      </fieldset>
-    </form>
-    <Transition name="fade">
-      <p v-if="idDone" class="form-message done-message">{{ done }}</p>
-    </Transition>
-    <Transition name="fade">
-      <p v-if="isFall"  class="form-message fall-message">{{ fall }}</p>
-    </Transition>
+          <AppButton
+            text="Войти"
+            class="filled-btn"
+            type="submit"
+            :isLoading="isLoading"
+          />
+        </fieldset>
+      </form>
+      <Transition name="fade">
+        <p v-if="idDone" class="form-message done-message">{{ done }}</p>
+      </Transition>
+      <Transition name="fade">
+        <p v-if="isFall"  class="form-message fall-message">{{ fall }}</p>
+      </Transition>
+    </div>
   </div>
 </template>
 
@@ -119,6 +122,11 @@ const login = async () => {
 </script>
 
 <style>
+.auth-layout {
+  height: 100vh;
+  width: 100%;
+  background: var(--main-color);
+}
 .form-wrapper {
   position: absolute;
   top: calc(50% - 504px / 2);

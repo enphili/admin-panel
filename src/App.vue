@@ -26,10 +26,18 @@ const handleAuthentication = (authenticated: boolean) => {
 
 <style>
 :root {
+  --body-color: white;
   --main-color: rgb(226, 232, 255);
+  --main-color-hover: rgb(206, 216, 255);
   --font-color: rgb(44, 42, 64);
+  --font-color-transparent: rgba(44, 42, 64, 0.6);
   --accent: rgb(128, 90, 212);
-  --lines: rgb(136, 119, 176)
+  --accent-hover: rgb(136, 119, 176);
+  --lines: rgb(136, 119, 176);
+  --header-height: 60px;
+  --left-sidebar-collapse-width: 60px;
+  --left-sidebar-width: 190px;
+  --right-sidebar-width: 240px;
 }
 @font-face {
   font-family: 'Inter';
@@ -54,16 +62,19 @@ const handleAuthentication = (authenticated: boolean) => {
 html {
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
+  height: 100%;
 }
 
 body {
   margin: 0;
   font-family: 'Inter', 'Roboto', sans-serif;
   width: 100%;
-  height: 100vh;
-  background: var(--main-color);
+  height: 100%;
+  background: var(--body-color);
   font-size: 16px;
+  font-weight: normal;
   color: var(--font-color);
+  transition: background-color 0.3s, color 0.3s;
 }
 main {
   display: block;
@@ -208,5 +219,10 @@ template {
 *::before,
 *::after {
   box-sizing: border-box;
+}
+.fl-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 </style>
