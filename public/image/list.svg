@@ -1,12 +1,8 @@
-<svg width="19.000000" height="12.000000" viewBox="0 0 19 12" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-	<desc>
-			Created with Pixso.
-	</desc>
-	<defs/>
-	<path id="Линия 12" d="M7 1L18 1" stroke="#2C2A40" stroke-opacity="1.000000" stroke-width="2.000000" stroke-linecap="round"/>
-	<path id="Линия 15" d="M1 1L2 1" stroke="#2C2A40" stroke-opacity="1.000000" stroke-width="2.000000" stroke-linecap="round"/>
-	<path id="Линия 16" d="M1 6L2 6" stroke="#2C2A40" stroke-opacity="1.000000" stroke-width="2.000000" stroke-linecap="round"/>
-	<path id="Линия 17" d="M1 11L2 11" stroke="#2C2A40" stroke-opacity="1.000000" stroke-width="2.000000" stroke-linecap="round"/>
-	<path id="Линия 13" d="M7 6L18 6" stroke="#2C2A40" stroke-opacity="1.000000" stroke-width="2.000000" stroke-linecap="round"/>
-	<path id="Линия 14" d="M7 11L18 11" stroke="#2C2A40" stroke-opacity="1.000000" stroke-width="2.000000" stroke-linecap="round"/>
+<svg width="16.000000" height="11.500000" viewBox="0 0 16 11.5" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<rect id="line" x="4.000000" rx="0.750000" width="12.000000" height="1.500000" fill="#2C2A40" fill-opacity="1.000000"/>
+	<rect id="line" x="4.000000" y="5.000000" rx="0.750000" width="12.000000" height="1.500000" fill="#2C2A40" fill-opacity="1.000000"/>
+	<rect id="line" x="4.000000" y="10.000000" rx="0.750000" width="12.000000" height="1.500000" fill="#2C2A40" fill-opacity="1.000000"/>
+	<rect id="point" rx="0.750000" width="2.000000" height="1.500000" fill="#2C2A40" fill-opacity="1.000000"/>
+	<rect id="point" y="5.000000" rx="0.750000" width="2.000000" height="1.500000" fill="#2C2A40" fill-opacity="1.000000"/>
+	<rect id="point" y="10.000000" rx="0.750000" width="2.000000" height="1.500000" fill="#2C2A40" fill-opacity="1.000000"/>
 </svg>

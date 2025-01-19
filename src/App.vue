@@ -32,7 +32,7 @@ const handleAuthentication = (authenticated: boolean) => {
   --font-color: rgb(44, 42, 64);
   --font-color-transparent: rgba(44, 42, 64, 0.6);
   --accent: rgb(128, 90, 212);
-  --accent-hover: rgb(136, 119, 176);
+  --accent-hover: rgb(153, 121, 228);
   --lines: rgb(136, 119, 176);
   --header-height: 60px;
   --left-sidebar-collapse-width: 60px;

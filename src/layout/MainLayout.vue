@@ -1,33 +1,92 @@
 <template>
   <div>
     <Header></Header>
-    <LeftBar></LeftBar>
-    <div class="iframe"></div>
-    <div class="right-bar"></div>
+
+    <LeftSideBar
+      @selectPage="setMenuItem('SelectPage')"
+      @selectBackups="setMenuItem('SelectBackups')"
+      @editeHead="setMenuItem('EditeHead')"
+      @editeText="setMenuItem('EditeText')"
+      @editeImg="setMenuItem('EditeImg')"
+      @goToSettings="setMenuItem('Settings')"
+      :currentMenuItem
+    />
+
+    <div :class="['iframe', {'short': isRightSideBarActive}]"></div>
+
+    <div :class="['right-sidebar', {'active': isRightSideBarActive}]">
+      <KeepAlive>
+        <component
+          v-if="currentMenuItem && menuItems[currentMenuItem]"
+          :is="menuItems[currentMenuItem]"
+          :key="currentMenuItem"
+        />
+      </KeepAlive>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import Header from '../components/Header.vue'
-import LeftBar from '../components/LeftBar.vue'
+import LeftSideBar from '../components/LeftSideBar.vue'
+import SelectPage from '../components/rightSideBar/SelectPage.vue'
+import SelectBackups from '../components/rightSideBar/SelectBackups.vue'
+import EditeHead from '../components/rightSideBar/EditeHead.vue'
+import EditeText from '../components/rightSideBar/EditeText.vue'
+import EditeImg from '../components/rightSideBar/EditeImg.vue'
+import Settings from '../components/rightSideBar/Settings.vue'
+import {ref} from 'vue'
+
+const isRightSideBarActive = ref(false)
+const menuItems = {
+  SelectPage,
+  SelectBackups,
+  EditeHead,
+  EditeText,
+  EditeImg,
+  Settings
+}
+type MenuItemKey = keyof typeof menuItems
+const currentMenuItem = ref<MenuItemKey | ''>('')
+
+const setMenuItem = (menuKey: MenuItemKey) => {
+  if (menuItems[menuKey]) {
+    isRightSideBarActive.value = true
+    currentMenuItem.value = menuKey
+  }
+}
 
 </script>
 
 <style>
-.iframe {
-  height: 2000px;
-  top: var(--header-height);
-  left: var(--left-sidebar-collapse-width);
-  right: var(--right-sidebar-width);
-  background: darkmagenta;
-}
-.right-bar {
+.right-sidebar {
   position: fixed;
   right: 0;
   bottom: 0;
-  width: var(--right-sidebar-width);
+  width: 0;
   height: calc(100vh - var(--header-height));
-  background: aqua;
+  border-top: 1px solid var(--lines);
+  background: var(--main-color);
+  overflow: hidden;
+  transition: width 0.1s ease;
   z-index: 20;
+}
+.right-sidebar.active {
+  width: var(--right-sidebar-width);
+  padding: 30px 20px;
+}
+
+
+
+
+
+.iframe {
+  margin-top: var(--header-height);
+  margin-left: var(--left-sidebar-collapse-width);
+  margin-right: 0;
+  transition: margin-right 0.1s ease;
+}
+.iframe.short {
+  margin-right: var(--right-sidebar-width);
 }
 </style>
