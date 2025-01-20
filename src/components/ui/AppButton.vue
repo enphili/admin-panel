@@ -22,11 +22,11 @@ const {text, class: className, type = 'button', isLoading = false} = defineProps
 <style>
 .btn {
   min-width: 80px;
-  min-height: 35px;
+  min-height: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 6px 15px;
+  padding: 3px 15px;
   border-radius: 5px;
   color: white;
   font-size: 16px;

@@ -7,7 +7,9 @@
         <p class="header__file-name">index.html</p>
       </div>
     </div>
-    <h3 class="header__operation-title">Начните редактирование выбрав соответствующий пункт на левой панели</h3>
+    <h3 class="header__operation-title">
+      {{ operationTitle }}
+    </h3>
     <div class="fl-row header__actions">
       <div class="header__theme-toggle">
         <label class="toggle">
@@ -23,6 +25,10 @@
 
 <script setup lang="ts">
 import AppButton from './ui/AppButton.vue'
+
+defineProps<{
+  operationTitle?: string
+}>()
 
 </script>
 
@@ -87,13 +93,11 @@ import AppButton from './ui/AppButton.vue'
   width: 50px;
   height: 24px;
 }
-
 .toggle input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .slider {
   position: absolute;
   cursor: pointer;
@@ -104,7 +108,6 @@ import AppButton from './ui/AppButton.vue'
   background-color: var(--accent);
   border-radius: 25px;
 }
-
 .slider:before {
   position: absolute;
   content: "";
@@ -119,12 +122,9 @@ import AppButton from './ui/AppButton.vue'
   transition: 0.4s;
   border-radius: 50%;
 }
-
-/* При включении */
 input:checked + .slider {
   background-color: var(--accent-hover);
 }
-
 input:checked + .slider:before {
   background-image: url("/image/moon.svg");
   transform: translateX(25px);

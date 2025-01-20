@@ -14,7 +14,7 @@ import AppButton from '../ui/AppButton.vue'
 
 </script>
 
-<style scoped>
+<style>
 .rightSideBar-input {
   width: 100%;
   height: 30px;
@@ -24,6 +24,7 @@ import AppButton from '../ui/AppButton.vue'
   border-radius: 5px;
   background: none;
   outline: none;
+  font-size: 12px;
   color: var(--font-color);
 }
 </style>

@@ -64,8 +64,8 @@ const openContextMenu = (event: MouseEvent, index: number | null) => {
     let y = event.clientY
 
     // Если меню выходит за правую границу, корректируем координаты
-    if (x + menuWidth > viewportWidth + scrollbarWidth) {
-      x = viewportWidth - scrollbarWidth - menuWidth - 5
+    if (x + menuWidth > viewportWidth + (scrollbarWidth *2)) {
+      x = viewportWidth - (scrollbarWidth * 2) - menuWidth - 5
     }
 
     // Устанавливаем позицию меню

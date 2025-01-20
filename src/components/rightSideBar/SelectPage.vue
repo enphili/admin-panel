@@ -46,8 +46,7 @@ const pages = [
   border-radius: 5px;
   list-style: none;
   overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--font-color) var(--lines);
+  overflow-x: hidden;
 }
 .pages-list li:hover a {
   color: var(--accent);
@@ -56,15 +55,20 @@ const pages = [
   margin-top: 30px;
 }
 .pages-list::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 .pages-list::-webkit-scrollbar-track {
-  background: var(--font-color);
+  border-radius: 4px;
+  background: var(--main-color);
+  transition: background-color 0.3s ease;
 }
 .pages-list::-webkit-scrollbar-thumb {
-  background-color: var(--lines);
-  border-radius: 2px;
-  border: 3px solid var(--font-color)
+  background-color: var(--main-color);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+.pages-list:hover::-webkit-scrollbar-thumb {
+  background: var(--main-color-hover);
 }
 .page-link {
   font-size: 12px;

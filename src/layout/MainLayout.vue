@@ -1,6 +1,8 @@
 <template>
   <div>
-    <Header></Header>
+    <Header
+      :operationTitle="operationTitle[currentMenuItem]"
+    ></Header>
 
     <LeftSideBar
       @selectPage="setMenuItem('SelectPage')"
@@ -48,6 +50,15 @@ const menuItems = {
 }
 type MenuItemKey = keyof typeof menuItems
 const currentMenuItem = ref<MenuItemKey | ''>('')
+const operationTitle = {
+  '': 'Начните редактирование, выбрав соответствующий пункт на левой панели',
+  SelectPage: 'Режим выбора страницы подлежащей редактированию',
+  SelectBackups: 'Режим восстановления резервной копии',
+  EditeHead: 'Режим редактирования раздела Head страницы',
+  EditeText: 'Режим редактирования текстовых составляющих страницы',
+  EditeImg: 'Режим редактирования изображений страницы',
+  Settings: 'Настройки панели управления'
+}
 
 const setMenuItem = (menuKey: MenuItemKey) => {
   if (menuItems[menuKey]) {
@@ -67,7 +78,8 @@ const setMenuItem = (menuKey: MenuItemKey) => {
   height: calc(100vh - var(--header-height));
   border-top: 1px solid var(--lines);
   background: var(--main-color);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
   transition: width 0.1s ease;
   z-index: 20;
 }
@@ -75,9 +87,22 @@ const setMenuItem = (menuKey: MenuItemKey) => {
   width: var(--right-sidebar-width);
   padding: 30px 20px;
 }
-
-
-
+.right-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+.right-sidebar::-webkit-scrollbar-track {
+  border-radius: 4px;
+  background: var(--main-color);
+  transition: background-color 0.3s ease;
+}
+.right-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--main-color);
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+.right-sidebar:hover::-webkit-scrollbar-thumb {
+  background: var(--main-color-hover);
+}
 
 
 .iframe {
