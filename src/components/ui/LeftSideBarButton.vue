@@ -70,6 +70,9 @@ const getIconComponent = (iconName: string) => {
   width: 20px;
   height: 20px;
 }
+.sidebar-toggle-btn svg path {
+  stroke: var(--font-color);
+}
 .sidebar-toggle-btn:hover {
   background-color: var(--main-color-hover);
 }
@@ -119,8 +122,9 @@ const getIconComponent = (iconName: string) => {
   left: 130%;
   transform: translateY(-50%);
   background-color: var(--font-color);
-  color: var(--body-color);
+  color: var(--main-color);
   padding: 5px 10px;
+  border: 1px solid var(--main-color);
   font-size: 12px;
   border-radius: 5px;
   white-space: nowrap;
@@ -144,6 +148,9 @@ const getIconComponent = (iconName: string) => {
 .sidebar-menu-btn svg {
   width: 17px;
   height: 17px;
+}
+.sidebar-menu-btn svg path, .sidebar-menu-btn svg rect {
+  fill: var(--font-color);
 }
 .sidebar-menu-btn.current svg path, .sidebar-menu-btn.current svg rect {
   fill: var(--accent);

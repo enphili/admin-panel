@@ -3,8 +3,11 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
-import {computed, ref} from 'vue'
+import {computed, ref, defineAsyncComponent} from 'vue'
+import { initTheme } from './use/useTheme.ts'
+
+// Инициализация темы при старте приложения
+initTheme()
 
 // Динамическая загрузка компонентов
 const AuthLayout = defineAsyncComponent(() => import('./layout/AuthLayout.vue'))
@@ -22,6 +25,7 @@ const handleAuthentication = (authenticated: boolean) => {
   isAuthenticated.value = authenticated
 }
 
+
 </script>
 
 <style>
@@ -38,6 +42,12 @@ const handleAuthentication = (authenticated: boolean) => {
   --left-sidebar-collapse-width: 60px;
   --left-sidebar-width: 190px;
   --right-sidebar-width: 240px;
+}
+.dark {
+  --main-color: rgb(44, 42, 64);
+  --main-color-hover: rgb(73, 70, 100);
+  --font-color: white;
+  --font-color-transparent: rgba(255, 255, 255, 0.6);
 }
 @font-face {
   font-family: 'Inter';
@@ -74,6 +84,7 @@ body {
   font-size: 16px;
   font-weight: normal;
   color: var(--font-color);
+  overflow-x: hidden;
   transition: background-color 0.3s, color 0.3s;
 }
 main {

@@ -1,6 +1,6 @@
 <template>
   <p class="subtitle">Для создания Favicon можно воспользоваться таким сервисом как
-    <a href="https://realfavicongenerator.net/">RealFaviconGenerator</a>
+    <a class="subtitle-link" href="https://realfavicongenerator.net/">RealFaviconGenerator</a>
   </p>
   <p class="subtitle">Путь к фавикону</p>
   <input class="rightSideBar-input" type="text" value="/">
@@ -25,6 +25,9 @@ import AppButton from '../ui/AppButton.vue'
   background: none;
   outline: none;
   font-size: 12px;
+  color: var(--font-color);
+}
+.subtitle-link {
   color: var(--font-color);
 }
 </style>

@@ -29,7 +29,7 @@ const {text, class: className, type = 'button', isLoading = false} = defineProps
   padding: 3px 15px;
   border-radius: 5px;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   user-select: none;
   border: none;

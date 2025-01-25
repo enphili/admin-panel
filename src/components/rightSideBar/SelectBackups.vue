@@ -6,7 +6,12 @@
       :key="index"
       @contextmenu.prevent="openContextMenu($event, index)"
     >
-      <a href="#" class="page-link">{{ `${index + 1}. ${backup}`}}</a>
+      <a
+        href="#"
+        class="page-link"
+      >
+        {{ `${index + 1}. ${backup}`}}
+      </a>
     </li>
   </ul>
   <p class="subtitle second">Удалить все файлы backup для данной страницы</p>
@@ -57,15 +62,14 @@ const openContextMenu = (event: MouseEvent, index: number | null) => {
   if (menuRef.value) {
     const menuRect = menuRef.value.getBoundingClientRect() // Получаем размеры меню
     const menuWidth = menuRect.width // Ширина контекстного меню
-    const viewportWidth = window.innerWidth // ширина области просмотра
-    const scrollbarWidth = viewportWidth - document.documentElement.clientWidth // Ширина полосы прокрутки
+    const viewportWidth = document.documentElement.clientWidth // Видимая ширина окна
 
     let x = event.clientX
     let y = event.clientY
 
     // Если меню выходит за правую границу, корректируем координаты
-    if (x + menuWidth > viewportWidth + (scrollbarWidth *2)) {
-      x = viewportWidth - (scrollbarWidth * 2) - menuWidth - 5
+    if (x + menuWidth > viewportWidth) {
+      x = viewportWidth - menuWidth - 5 // Смещаем меню влево
     }
 
     // Устанавливаем позицию меню
@@ -125,8 +129,5 @@ onBeforeUnmount(() => {
   text-wrap: nowrap;
   cursor: pointer;
   transition: color 0.2s ease;
-}
-.context-menu a:hover {
-  color: var(--accent);
 }
 </style>

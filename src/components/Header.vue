@@ -13,7 +13,12 @@
     <div class="fl-row header__actions">
       <div class="header__theme-toggle">
         <label class="toggle">
-          <input type="checkbox" id="theme-switch" />
+          <input
+            type="checkbox"
+            id="theme-switch"
+            v-model="isDarkMode"
+            @change="toggleTheme(isDarkMode)"
+          />
           <span class="slider"></span>
         </label>
       </div>
@@ -25,10 +30,14 @@
 
 <script setup lang="ts">
 import AppButton from './ui/AppButton.vue'
+import {initTheme, toggleTheme} from '../use/useTheme.ts'
 
 defineProps<{
-  operationTitle?: string
+  operationTitle: string
 }>()
+
+const isDarkMode = initTheme()
+
 
 </script>
 
