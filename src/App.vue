@@ -1,6 +1,6 @@
 <template>
   <component :is="currentComponent" @authenticated="handleAuthentication"></component>
-  <notifications position="top center" />
+  <notifications position="top center" animation-type="velocity" />
 </template>
 
 <script setup lang="ts">

@@ -55,6 +55,7 @@ import AppButton from '../components/ui/AppButton.vue'
 import {computed, ref} from 'vue'
 import {useValidation} from '../use/auth/useValidation.ts'
 import {AuthService} from '../auth/AuthService.ts'
+import { useNotification } from "@kyvg/vue3-notification";
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
@@ -74,6 +75,8 @@ const isPasswordTouched = ref(false)
 // иконка для переключения видимости пароля
 const img = computed(() => isPasswordHidden.value ? '/image/eye.svg' : '/image/eye-off.svg')
 
+const { notify }  = useNotification()
+
 // Валидация полей
 const validation = computed(() => useValidation(username.value, password.value))
 // Отображаем ошибку только если поле ввода было в фокусе
@@ -91,16 +94,31 @@ const handleLogin = async () => {
   }
 
   isLoading.value = true
-  const authService = new AuthService(username.value, password.value, emit)
+  authErrorMessage.value = ''
 
-  const result = await authService.loginToServer()
+  try {
+    const authService = new AuthService(username.value, password.value, emit)
+    const result = await authService.loginToServer()
 
-  if (!result.success) {
-    authErrorMessage.value = result.message
+    if (result.success) {
+      notify({
+        title: 'Авторизация',
+        text: 'Вы успешно вошли в систему!',
+        type: 'success',
+      })
+    }
+    else {
+      authErrorMessage.value = result.message
+      setTimeout(() => authErrorMessage.value = '', 2500)
+    }
+  }
+  catch (error) {
+    authErrorMessage.value = error instanceof Error ? error.message : 'Неизвестная ошибка'
     setTimeout(() => authErrorMessage.value = '', 2500)
   }
-
-  isLoading.value = false
+  finally {
+    isLoading.value = false
+  }
 }
 
 </script>
