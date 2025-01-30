@@ -1,7 +1,7 @@
 <template>
   <div class="auth-layout">
     <div class="form-wrapper">
-      <form class="login-form" @submit.prevent="login">
+      <form class="login-form" @submit.prevent="handleLogin">
         <fieldset>
           <legend class="form-title">Вход в панель редактирования</legend>
           <label for="name" class="form-label">Логин
@@ -11,8 +11,9 @@
               class="form-input"
               v-model="username"
               placeholder="укажите ваш логин"
+              @blur="isUsernameTouched = true"
             />
-            <span class="validate-text">{{ loginValidateMessage }}</span>
+            <span class="validate-text">{{ loginError }}</span>
           </label>
 
           <label for="password" class="form-label password-label">Пароль
@@ -20,18 +21,19 @@
               id="password"
               class="form-input"
               v-model="password"
-              :type="isPassword ? 'password' : 'text'"
+              :type="isPasswordHidden ? 'password' : 'text'"
               placeholder="введите пароль"
+              @blur="isPasswordTouched = true"
             />
             <img
               class="input-eye"
               :src="img"
               width="16"
               height="16"
-              @click="isPassword = !isPassword"
+              @click="isPasswordHidden = !isPasswordHidden"
               alt="переключение видимости пароля"
             />
-            <span class="validate-text">{{ passwordValidateMessage }}</span>
+            <span class="validate-text">{{ passwordError }}</span>
           </label>
           <AppButton
             text="Войти"
@@ -42,10 +44,7 @@
         </fieldset>
       </form>
       <Transition name="fade">
-        <p v-if="idDone" class="form-message done-message">{{ done }}</p>
-      </Transition>
-      <Transition name="fade">
-        <p v-if="isFall"  class="form-message fall-message">{{ fall }}</p>
+        <p v-if="authErrorMessage"  class="form-message fall-message">{{ authErrorMessage }}</p>
       </Transition>
     </div>
   </div>
@@ -53,7 +52,7 @@
 
 <script setup lang="ts">
 import AppButton from '../components/ui/AppButton.vue'
-import {computed, ref, watch} from 'vue'
+import {computed, ref} from 'vue'
 import {useValidation} from '../use/auth/useValidation.ts'
 import {AuthService} from '../auth/AuthService.ts'
 
@@ -64,59 +63,44 @@ const emit = defineEmits<{
 // Локальные состояния
 const username = ref('')
 const password = ref('')
-const isPassword = ref(true)
-const isFall = ref(false)
-const fall = ref('Ошибка авторизации')
-const done = ref('Вы успешно авторизовались')
-const idDone = ref(false)
+const isPasswordHidden = ref(true)
 const isLoading = ref(false)
+const authErrorMessage = ref('')
 
-// Валидационные сообщения
-const loginValidateMessage = ref('')
-const passwordValidateMessage = ref('')
+// Флаги "трогали ли поля"
+const isUsernameTouched = ref(false)
+const isPasswordTouched = ref(false)
 
+// иконка для переключения видимости пароля
+const img = computed(() => isPasswordHidden.value ? '/image/eye.svg' : '/image/eye-off.svg')
 
-// Обновляем валидацию при изменении полей
-watch([username, password], ([newUsername, newPassword]) => {
-  const validation = useValidation(newUsername, newPassword)
-  loginValidateMessage.value = validation.loginValidateMessage
-  passwordValidateMessage.value = validation.passwordValidateMessage
-})
+// Валидация полей
+const validation = computed(() => useValidation(username.value, password.value))
+// Отображаем ошибку только если поле ввода было в фокусе
+const loginError = computed(() => isUsernameTouched.value ? validation.value.loginError : '')
+const passwordError = computed(() => isPasswordTouched.value ? validation.value.passwordError : '')
 
-const img = computed(() => isPassword.value ? '/image/eye.svg' : '/image/eye-off.svg')
 
 // Функция входа
-const login = async () => {
+const handleLogin = async () => {
+  isUsernameTouched.value = true
+  isPasswordTouched.value = true
+
+  if (!validation.value.isLoginValid || !validation.value.isPasswordValid) {
+    return
+  }
+
   isLoading.value = true
   const authService = new AuthService(username.value, password.value, emit)
 
-  try {
-    const result = await authService.loginToServer()
+  const result = await authService.loginToServer()
 
-    if (result.isValidationError) {
-      loginValidateMessage.value = result.loginValidateMessage
-      passwordValidateMessage.value = result.passwordValidateMessage
-      isFall.value = false
-      idDone.value = false
-    } else if (result.isFall) {
-      fall.value = result.fall
-      isFall.value = true
-      idDone.value = false
-      setTimeout(() => {
-        isFall.value = false
-      }, 2500)
-    } else {
-      idDone.value = true
-      setTimeout(() => {
-        idDone.value = false
-      }, 2500)
-      isFall.value = false
-    }
-  } catch (error) {
-    console.error(error)
-  } finally {
-    isLoading.value = false
+  if (!result.success) {
+    authErrorMessage.value = result.message
+    setTimeout(() => authErrorMessage.value = '', 2500)
   }
+
+  isLoading.value = false
 }
 
 </script>
@@ -187,6 +171,7 @@ const login = async () => {
    align-items: center;
    height: 60px;
    border-radius: 5px;
+   padding: 5px 15px;
    color: white;
  }
 .done-message {

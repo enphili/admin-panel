@@ -64,14 +64,14 @@ const validatePassword = (password: string): { isValid: boolean, message: string
 
 // Хук для валидации
 export const useValidation = (login: string, password: string) => {
-  const loginValidation = validateLogin(login)
-  const passwordValidation = validatePassword(password)
+  const loginError = validateLogin(login)
+  const passwordError = validatePassword(password)
   
   return {
-    isLoginValid: loginValidation.isValid,
-    loginValidateMessage: loginValidation.message,
-    isPasswordValid: passwordValidation.isValid,
-    passwordValidateMessage: passwordValidation.message,
+    isLoginValid: loginError.isValid,
+    loginError: loginError.message,
+    isPasswordValid: passwordError.isValid,
+    passwordError: passwordError.message,
   }
 }
 

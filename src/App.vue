@@ -1,10 +1,12 @@
 <template>
   <component :is="currentComponent" @authenticated="handleAuthentication"></component>
+  <notifications position="top center" />
 </template>
 
 <script setup lang="ts">
 import {computed, ref, defineAsyncComponent} from 'vue'
 import { initTheme } from './use/useTheme.ts'
+import {Notifications} from '@kyvg/vue3-notification'
 
 // Инициализация темы при старте приложения
 initTheme()

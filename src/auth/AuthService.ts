@@ -14,30 +14,28 @@ export class AuthService {
   }
   
   // Метод для валидации данных
-  validate() {
-    const {
-      isLoginValid,
-      loginValidateMessage,
-      isPasswordValid,
-      passwordValidateMessage
-    } = useValidation(this.login, this.password)
+  private validate(): { success: boolean; message: string } {
+    const { isLoginValid, loginError, isPasswordValid, passwordError } = useValidation(this.login, this.password)
     
-    return {
-      isValid: isLoginValid && isPasswordValid,
-      loginValidateMessage,
-      passwordValidateMessage,
+    if (!isLoginValid) {
+      return { success: false, message: loginError }
     }
+    
+    if (!isPasswordValid) {
+      return { success: false, message: passwordError }
+    }
+    
+    return { success: true, message: '' }
   }
   
   // Метод для авторизации
   async loginToServer() {
     // Валидация перед отправкой
     const validation = this.validate()
-    if (!validation.isValid) {
+    if (!validation.success) {
       return {
-        isValidationError: true,
-        loginValidateMessage: validation.loginValidateMessage,
-        passwordValidateMessage: validation.passwordValidateMessage,
+        success: false,
+        message: validation.message,
       }
     }
     
@@ -45,9 +43,7 @@ export class AuthService {
     try {
       const response = await fetch('/api/login.php', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           login: this.login,
           password: this.password,
@@ -55,32 +51,16 @@ export class AuthService {
       })
       
       const data = await response.json()
-      if (data.success && data.isLogin) {
-        this.emit('authenticated', true)
-        return {
-          isValidationError: false,
-          isFall: false,
-          fall: '',
-          loginValidateMessage: '',
-          passwordValidateMessage: '',
-        }
-      } else {
-        return {
-          isValidationError: false,
-          isFall: true,
-          fall: data.message || 'Неверные данные для входа',
-          loginValidateMessage: '',
-          passwordValidateMessage: '',
-        }
+      
+      if (!response.ok || !data.success) {
+        return { success: false, message: data.message || 'Неверные данные для входа' }
       }
-    } catch (error) {
-      return {
-        isValidationError: false,
-        isFall: true,
-        fall: 'Ошибка подключения к серверу',
-        loginValidateMessage: '',
-        passwordValidateMessage: '',
-      }
+      
+      this.emit('authenticated', true)
+      return { success: true }
+    }
+    catch (error) {
+      return { success: false, message: error instanceof Error ? error.message : 'Ошибка подключения' }
     }
   }
   
