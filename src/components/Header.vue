@@ -22,21 +22,64 @@
           <span class="slider"></span>
         </label>
       </div>
-      <AppButton text="Сохранить" class="filled-btn"></AppButton>
-      <AppButton text="Выйти" class="outline-btn"></AppButton>
+      <AppButton text="Сохранить" class="filled-btn" />
+      <AppButton
+        text="Выйти"
+        class="outline-btn"
+        @click="handleLogout"
+      />
     </div>
   </header>
+
+  <AppModalDialog
+    :show-modal="showLogoutConfirmation"
+    :message="logoutMessage"
+    :title="logoutTitle"
+    @confirm="confirmLogout"
+    @close="showLogoutConfirmation = false"
+  />
+
+
 </template>
 
 <script setup lang="ts">
 import AppButton from './ui/AppButton.vue'
+import AppModalDialog from './ui/AppModalDialog.vue'
 import {initTheme, toggleTheme} from '../use/useTheme.ts'
+import {ref} from 'vue'
 
 defineProps<{
   operationTitle: string
 }>()
 
+const showLogoutConfirmation = ref(false)
+const logoutTitle = ref('')
+const logoutMessage = ref('')
+
+const isDirty = ref(true) // флаг изменений
+
 const isDarkMode = initTheme()
+
+// Функция выхода из системы
+const handleLogout = () => {
+  if (isDirty.value) {
+    showLogoutConfirmation.value = true
+    logoutTitle.value = 'Выход из системы'
+    logoutMessage.value = 'Вы действительно хотите выйти? Все несохраненные данные будут утеряны.'
+  }
+  else {
+    logoutAndRedirect() // выходим сразу
+  }
+}
+
+const confirmLogout = () => {
+  showLogoutConfirmation.value = false
+  logoutAndRedirect()
+}
+
+const logoutAndRedirect = () => {
+  window.location.replace('/')
+}
 
 
 </script>

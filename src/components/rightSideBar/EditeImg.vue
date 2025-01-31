@@ -140,7 +140,7 @@ import AppButton from '../ui/AppButton.vue'
   align-items: center;
   height: 30px;
   padding: 3px 15px;
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -195,7 +195,7 @@ import AppButton from '../ui/AppButton.vue'
   flex-shrink: 0;
   flex-grow: 0;
   border: 1px solid var(--accent);
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   background-repeat: no-repeat;
   background-position: center center;
   background-size: 50% 50%;
@@ -246,7 +246,7 @@ import AppButton from '../ui/AppButton.vue'
   width: 20px;
   height: 20px;
   margin-left: auto;
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   background: none;
   border: none;
   outline: none;
@@ -276,7 +276,7 @@ import AppButton from '../ui/AppButton.vue'
   width: 100%;
   height: 18px;
   border: 1px solid var(--accent);
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   padding: 3px 4px;
   background: none;
   outline: none;

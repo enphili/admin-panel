@@ -21,7 +21,7 @@ import AppButton from '../ui/AppButton.vue'
   margin-bottom: 20px;
   padding: 5px 10px;
   border: 1px solid var(--accent);
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   background: none;
   outline: none;
   font-size: 12px;

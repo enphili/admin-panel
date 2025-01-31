@@ -27,7 +27,7 @@ const {text, class: className, type = 'button', isLoading = false} = defineProps
   justify-content: center;
   align-items: center;
   padding: 3px 15px;
-  border-radius: 5px;
+  border-radius: var(--border-radius);
   color: white;
   font-size: 15px;
   cursor: pointer;

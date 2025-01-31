@@ -40,10 +40,12 @@ const handleAuthentication = (authenticated: boolean) => {
   --accent: rgb(128, 90, 212);
   --accent-hover: rgb(153, 121, 228);
   --lines: rgb(136, 119, 176);
+  --modal-bg-color: rgba(44, 42, 64, 0.7);
   --header-height: 60px;
   --left-sidebar-collapse-width: 60px;
   --left-sidebar-width: 190px;
   --right-sidebar-width: 240px;
+  --border-radius: 5px
 }
 .dark {
   --main-color: rgb(44, 42, 64);

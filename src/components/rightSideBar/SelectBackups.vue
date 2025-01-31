@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
   position: fixed;
   min-width: 150px;
   padding: 8px;
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   background: var(--main-color-hover);
   z-index: 100;

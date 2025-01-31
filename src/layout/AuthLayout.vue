@@ -188,7 +188,7 @@ const handleLogin = async () => {
    justify-content: center;
    align-items: center;
    height: 60px;
-   border-radius: 5px;
+   border-radius: var(--border-radius) 5px;
    padding: 5px 15px;
    color: white;
  }

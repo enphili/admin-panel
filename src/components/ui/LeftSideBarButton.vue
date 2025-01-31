@@ -58,7 +58,7 @@ const getIconComponent = (iconName: string) => {
   align-self: flex-end;
   width: 30px;
   height: 30px;
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   border: none;
   background: none;
   outline: none;
@@ -126,7 +126,7 @@ const getIconComponent = (iconName: string) => {
   padding: 5px 10px;
   border: 1px solid var(--main-color);
   font-size: 12px;
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   white-space: nowrap;
   overflow: hidden;
   opacity: 0;
@@ -143,7 +143,7 @@ const getIconComponent = (iconName: string) => {
 }
 .sidebar.collapse .sidebar-menu-btn {
   justify-content: center;
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
 }
 .sidebar-menu-btn svg {
   width: 17px;

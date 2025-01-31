@@ -43,7 +43,7 @@ const pages = [
   width: 100%;
   padding: 15px;
   border: 1px solid var(--accent);
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   list-style: none;
   overflow-y: auto;
   overflow-x: hidden;

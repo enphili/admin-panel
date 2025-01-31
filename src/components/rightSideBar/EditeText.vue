@@ -161,7 +161,7 @@ const selectedBGColor = ref('#FFFFFF') // Начальный цвет
   margin: 0;
   box-sizing: border-box;
   border: 1px solid var(--accent);
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   outline: none;
   font-size: 12px;
   font-family: sans-serif;
@@ -198,7 +198,7 @@ const selectedBGColor = ref('#FFFFFF') // Начальный цвет
   padding: 2px;
   box-sizing: border-box;
   border: 1px solid var(--accent);
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   background: none;
   cursor: pointer;
 }
@@ -207,7 +207,7 @@ const selectedBGColor = ref('#FFFFFF') // Начальный цвет
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: 5px;
+  border-radius: var(--border-radius) 5px;
   background-color: var(--selected-color, white);
   pointer-events: none;
 }
