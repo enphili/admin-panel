@@ -71,6 +71,12 @@ jobs:
             ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin
             # -a (архивация), -v (вывод деталей), -z (сжатие), --delete (удаление лишних файлов на сервере)
 
+      - name: Print working directory
+        run: pwd
+
+      - name: List files in current directory
+        run: ls -alh
+
       - name: Copy backend files to remote server # Копируем бэк файлы на сервер
         run: |
           rsync -avz --delete \
