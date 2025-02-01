@@ -23,8 +23,9 @@ jobs:
         with:
           path: ~/.npm # Путь к npm-кэшу
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Уникальный ключ для кэша
+          # Восстанавливаем кэш, если нет точного совпадения
           restore-keys: |
-            ${{ runner.os }}-node- # Восстанавливаем кэш, если нет точного совпадения
+            ${{ runner.os }}-node-
 
       - name: Install dependencies # Устанавливаем зависимости
         run: npm ci # Используем npm ci для чистой установки
