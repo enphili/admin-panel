@@ -1,13 +1,80 @@
-name: deploy app
+name: deploy app # Название workflow
 on:
   push:
     branches:
-      - main
+      - main # Запускаем процесс при пуше в ветку main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build: # Джоб для сборки приложения
+    runs-on: ubuntu-latest # Используем виртуальную машину с Ubuntu последней версии
 
     steps:
-      - name: Checkout code
+      - name: Checkout code # Клонируем репозиторий
         uses: actions/checkout@v4
+
+      - name: Setup Node.js # Устанавливаем Node.js 22.13.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.0'
+          cache: 'npm' # Кэшируем зависимости npm
+
+      - name: Cache node_modules # Настраиваем кэширование node_modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm # Путь к npm-кэшу
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Уникальный ключ для кэша
+          # Восстанавливаем кэш, если нет точного совпадения
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies # Устанавливаем зависимости
+        run: npm ci # Используем npm ci для чистой установки
+
+      - name: Build # Собираем проект
+        run: npm run build
+
+      - name: Upload production code # Загружаем артефакт сборки
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-code # Название артефакта
+          path: dist # Загружаем содержимое папки dist (финальная сборка)
+
+  deploy: # Джоб для развертывания на сервере
+    needs: build # Ждем завершения задачи build перед выполнением deploy
+    runs-on: ubuntu-latest # Запускаем на Ubuntu
+
+    steps:
+      - name: Download production code # Загружаем артефакт сборки
+        uses: actions/download-artifact@v4
+        with:
+          name: production-code # Загружаем артефакт с таким же именем
+          path: dist # Помещаем в локальную папку dist
+
+      - name: Setup SSH # Настраиваем SSH-доступ
+        run: |
+          mkdir -p ~/.ssh # Создаем директорию для SSH-ключей
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa # Записываем приватный ключ SSH
+          chmod 600 ~/.ssh/id_rsa # Даем корректные права на файл
+
+      - name: Check if build directory is not empty # Проверяем, что dist/ не пустая
+        run: |
+          if [ -z "$(ls -A dist)" ]; then  # Проверяем, есть ли файлы в dist/
+            echo "Build directory is empty! Aborting deployment." # Выводим сообщение в лог
+            exit 1  # Прерываем выполнение, если dist/ пустая
+          fi
+          
+      - name: Copy frontend files to remote server # Копируем фронт файлы на сервер
+        run: |
+          rsync -avz --delete \
+            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
+            dist/ \
+            ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin
+            # -a (архивация), -v (вывод деталей), -z (сжатие), --delete (удаление лишних файлов на сервере)
+
+      - name: Copy backend files to remote server # Копируем бэк файлы на сервер
+        run: |
+          rsync -avz --delete \
+            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
+            backend/ \
+            ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin/api
+

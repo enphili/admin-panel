@@ -55,7 +55,7 @@ import AppButton from '../components/ui/AppButton.vue'
 import {computed, ref} from 'vue'
 import {useValidation} from '../use/auth/useValidation.ts'
 import {AuthService} from '../auth/AuthService.ts'
-import { useNotification } from "@kyvg/vue3-notification";
+import { useNotification } from "@kyvg/vue3-notification"
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
@@ -73,7 +73,10 @@ const isUsernameTouched = ref(false)
 const isPasswordTouched = ref(false)
 
 // иконка для переключения видимости пароля
-const img = computed(() => isPasswordHidden.value ? '/image/eye.svg' : '/image/eye-off.svg')
+const img = computed(() => isPasswordHidden.value
+  ? `${import.meta.env.BASE_URL}image/eye.svg`
+  : `${import.meta.env.BASE_URL}image/eye-off.svg`
+)
 
 const { notify }  = useNotification()
 
@@ -82,7 +85,6 @@ const validation = computed(() => useValidation(username.value, password.value))
 // Отображаем ошибку только если поле ввода было в фокусе
 const loginError = computed(() => isUsernameTouched.value ? validation.value.loginError : '')
 const passwordError = computed(() => isPasswordTouched.value ? validation.value.passwordError : '')
-
 
 // Функция входа
 const handleLogin = async () => {
@@ -156,7 +158,7 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   font-size: 12px;
-  color: var(--accent);
+  color: var(--lines);
 }
 .password-label {
   position: relative;

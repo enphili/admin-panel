@@ -1,17 +1,18 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
+
 export default defineConfig({
-  plugins: [
-    vue(),
-  ],
+  base: './',
+  plugins: [ vue(), ],
   server: {
     proxy: {
       // Прокси для API-запросов
       '/api': {
-        target: 'http://proremont.com/admin', // Локальный OpenServer сайт донор
+        target: 'https://proremont.com', // Локальный OpenServer сайт донор
         changeOrigin: true, // Подменить заголовок Host
-        rewrite: (path) => path.replace(/^\/api/, '/api'), // Оставляем путь неизменным
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/admin/api'), // Оставляем путь неизменным
       }
     }
   }

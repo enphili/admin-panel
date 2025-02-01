@@ -46,23 +46,28 @@
 import AppButton from './ui/AppButton.vue'
 import AppModalDialog from './ui/AppModalDialog.vue'
 import {initTheme, toggleTheme} from '../use/useTheme.ts'
+import { useAppStore } from '../store'
 import {ref} from 'vue'
 
 defineProps<{
   operationTitle: string
 }>()
 
+const store = useAppStore()
 const showLogoutConfirmation = ref(false)
 const logoutTitle = ref('')
 const logoutMessage = ref('')
 
-const isDirty = ref(true) // флаг изменений
-
 const isDarkMode = initTheme()
 
 // Функция выхода из системы
+const logoutAndRedirect = () => window.location.replace('/')
+const confirmLogout = () => {
+  showLogoutConfirmation.value = true
+  logoutAndRedirect()
+}
 const handleLogout = () => {
-  if (isDirty.value) {
+  if (store.hasChanges) {
     showLogoutConfirmation.value = true
     logoutTitle.value = 'Выход из системы'
     logoutMessage.value = 'Вы действительно хотите выйти? Все несохраненные данные будут утеряны.'
@@ -72,14 +77,6 @@ const handleLogout = () => {
   }
 }
 
-const confirmLogout = () => {
-  showLogoutConfirmation.value = false
-  logoutAndRedirect()
-}
-
-const logoutAndRedirect = () => {
-  window.location.replace('/')
-}
 
 
 </script>

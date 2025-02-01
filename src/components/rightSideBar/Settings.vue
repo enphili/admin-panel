@@ -41,9 +41,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { useAppStore } from '../../store'
+import {ref, onMounted, watch} from 'vue'
 
 const inputPath = ref('')
+const originalPath = ref('') // Тут хранится исходное значение пути
 const reLogin = ref('')
 const rePassword = ref('')
 const pathErrorMessage = ref('')
@@ -51,8 +53,22 @@ const loginErrorMessage = ref('')
 const passwordErrorMessage = ref('')
 
 // Регулярное выражение для допустимых символов
-const validPathRegex = /^[a-zA-Z0-9_-]+$/
+const validPathRegex = /^[a-zA-Z0-9_/-]+$/
 const validPasswordRegex = /^[a-zA-Z0-9!@#$%^&*]*$/
+
+const store = useAppStore()
+
+// Функция для проверки изменений
+const checkChanges = () => {
+  store.hasChanges = (
+    inputPath.value !== originalPath.value ||  // Изменился ли путь
+    reLogin.value !== '' ||                   // Было пусто → стало не пусто
+    rePassword.value !== ''                    // Было пусто → стало не пусто
+  )
+}
+
+// Следим за изменениями полей
+watch([inputPath, reLogin, rePassword], checkChanges)
 
 const validatePath = () => {
   if (inputPath.value === '') {
@@ -61,7 +77,7 @@ const validatePath = () => {
   }
 
   if (!validPathRegex.test(inputPath.value)) {
-    pathErrorMessage.value = 'Разрешены только латинские буквы, цифры и `_`, `-`'
+    pathErrorMessage.value = 'Разрешены только латинские буквы, цифры и `_`, `-`, `/`'
     return
   }
 
@@ -94,6 +110,10 @@ const validatePassword = () => {
   passwordErrorMessage.value = ''
 }
 
+// На момент монтирования компонента определяем текущий путь и сохраняем его как оригинальный
+onMounted(() => {
+  originalPath.value = inputPath.value = window.location.pathname // Например, "/admin"
+})
 
 </script>
 

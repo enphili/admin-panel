@@ -41,7 +41,7 @@ export class AuthService {
     
     // Если валидация пройдена, выполняем запрос
     try {
-      const response = await fetch('/api/login.php', {
+      const response = await fetch('api/login.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
