@@ -44,24 +44,14 @@ jobs:
     runs-on: ubuntu-latest # Запускаем на Ubuntu
 
     steps:
-      - name: Download production code # Загружаем артефакт сборки
-        uses: actions/download-artifact@v4
-        with:
-          name: production-code # Загружаем артефакт с таким же именем
-          path: dist # Помещаем в локальную папку dist
+      - name: Checkout code again for backend
+        uses: actions/checkout@v4
 
       - name: Setup SSH # Настраиваем SSH-доступ
         run: |
           mkdir -p ~/.ssh # Создаем директорию для SSH-ключей
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa # Записываем приватный ключ SSH
           chmod 600 ~/.ssh/id_rsa # Даем корректные права на файл
-
-      - name: Check if backend folder exists # Проверяем, что папка backend существует
-        run: |
-          if [ ! -d "backend" ]; then
-            echo "Backend directory does not exist! Aborting deployment."
-            exit 1
-          fi
 
       - name: Copy backend files to remote server # Копируем бэк файлы на сервер
         run: |
