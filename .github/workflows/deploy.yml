@@ -39,19 +39,18 @@ jobs:
           name: production-code # Название артефакта
           path: dist # Загружаем содержимое папки dist (финальная сборка)
 
-  deploy: # Джоб для развертывания на сервере
-    needs: build # Ждем завершения задачи build перед выполнением deploy
-    runs-on: ubuntu-latest # Запускаем на Ubuntu
+  copyapi:
+    runs-on: ubuntu-latest  # Этот job не зависит от других
 
     steps:
-      - name: Checkout code again for backend
+      - name: Checkout code for backend
         uses: actions/checkout@v4
 
-      - name: Setup SSH # Настраиваем SSH-доступ
+      - name: Setup SSH
         run: |
-          mkdir -p ~/.ssh # Создаем директорию для SSH-ключей
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa # Записываем приватный ключ SSH
-          chmod 600 ~/.ssh/id_rsa # Даем корректные права на файл
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
       - name: Copy backend files to remote server # Копируем бэк файлы на сервер
         run: |
@@ -59,6 +58,23 @@ jobs:
             -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
             backend/ \
             ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin/api
+
+  deploy: # Джоб для развертывания на сервере
+    needs: build # Ждем завершения задачи build перед выполнением deploy
+    runs-on: ubuntu-latest # Запускаем на Ubuntu
+
+    steps:
+      - name: Download production code # Загружаем артефакт сборки
+        uses: actions/download-artifact@v4
+        with:
+          name: production-code # Загружаем артефакт с таким же именем
+          path: dist # Помещаем в локальную папку dist
+
+      - name: Setup SSH # Настраиваем SSH-доступ
+        run: |
+          mkdir -p ~/.ssh # Создаем директорию для SSH-ключей
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa # Записываем приватный ключ SSH
+          chmod 600 ~/.ssh/id_rsa # Даем корректные права на файл
 
       - name: Check if build directory is not empty # Проверяем, что dist/ не пустая
         run: |
