@@ -23,9 +23,8 @@ jobs:
         with:
           path: ~/.npm # Путь к npm-кэшу
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }} # Уникальный ключ для кэша
-          # Восстанавливаем кэш, если нет точного совпадения
           restore-keys: |
-            ${{ runner.os }}-node-
+            ${{ runner.os }}-node- # Восстанавливаем кэш, если нет точного совпадения
 
       - name: Install dependencies # Устанавливаем зависимости
         run: npm ci # Используем npm ci для чистой установки
@@ -56,6 +55,20 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa # Записываем приватный ключ SSH
           chmod 600 ~/.ssh/id_rsa # Даем корректные права на файл
 
+      - name: Check if backend folder exists # Проверяем, что папка backend существует
+        run: |
+          if [ ! -d "backend" ]; then
+            echo "Backend directory does not exist! Aborting deployment."
+            exit 1
+          fi
+
+      - name: Copy backend files to remote server # Копируем бэк файлы на сервер
+        run: |
+          rsync -avz --delete \
+            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
+            backend/ \
+            ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin/api
+
       - name: Check if build directory is not empty # Проверяем, что dist/ не пустая
         run: |
           if [ -z "$(ls -A dist)" ]; then  # Проверяем, есть ли файлы в dist/
@@ -70,17 +83,4 @@ jobs:
             dist/ \
             ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin
             # -a (архивация), -v (вывод деталей), -z (сжатие), --delete (удаление лишних файлов на сервере)
-
-      - name: Print working directory
-        run: pwd
-
-      - name: List files in current directory
-        run: ls -alh
-
-      - name: Copy backend files to remote server # Копируем бэк файлы на сервер
-        run: |
-          rsync -avz --delete \
-            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
-            backend/ \
-            ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin/api
 
