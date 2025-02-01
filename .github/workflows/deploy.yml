@@ -39,26 +39,6 @@ jobs:
           name: production-code # Название артефакта
           path: dist # Загружаем содержимое папки dist (финальная сборка)
 
-  copyapi:
-    runs-on: ubuntu-latest  # Этот job не зависит от других
-
-    steps:
-      - name: Checkout code for backend
-        uses: actions/checkout@v4
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: Copy backend files to remote server # Копируем бэк файлы на сервер
-        run: |
-          rsync -avz --delete \
-            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
-            backend/ \
-            ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin/api
-
   deploy: # Джоб для развертывания на сервере
     needs: build # Ждем завершения задачи build перед выполнением deploy
     runs-on: ubuntu-latest # Запускаем на Ubuntu
@@ -91,3 +71,24 @@ jobs:
             ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin
             # -a (архивация), -v (вывод деталей), -z (сжатие), --delete (удаление лишних файлов на сервере)
 
+
+
+  copyapi:
+    runs-on: ubuntu-latest  # Этот job не зависит от других
+
+    steps:
+      - name: Checkout code for backend
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Copy backend files to remote server # Копируем бэк файлы на сервер
+        run: |
+          rsync -avz --delete \
+            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
+            backend/ \
+            ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin/api
