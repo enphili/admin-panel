@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import { useAppStore } from '../../store'
-import {ref, onMounted, watch} from 'vue'
+import {ref, onMounted, watch, computed} from 'vue'
 
 const inputPath = ref('')
 const originalPath = ref('') // Тут хранится исходное значение пути
@@ -59,16 +59,18 @@ const validPasswordRegex = /^[a-zA-Z0-9!@#$%^&*]*$/
 const store = useAppStore()
 
 // Функция для проверки изменений
-const checkChanges = () => {
-  store.hasChanges = (
+const hasChanges = computed(() => {
+  return (
     inputPath.value !== originalPath.value ||  // Изменился ли путь
-    reLogin.value !== '' ||                   // Было пусто → стало не пусто
-    rePassword.value !== ''                    // Было пусто → стало не пусто
+    reLogin.value.trim() !== '' ||            // Было пусто → стало не пусто
+    rePassword.value.trim() !== ''            // Было пусто → стало не пусто
   )
-}
+})
 
 // Следим за изменениями полей
-watch([inputPath, reLogin, rePassword], checkChanges)
+watch(hasChanges, value => {
+  store.setHasChanges(value)
+}, { immediate: true })
 
 const validatePath = () => {
   if (inputPath.value === '') {
