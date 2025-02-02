@@ -116,7 +116,6 @@ const validatePassword = () => {
 onMounted(() => {
   originalPath.value = inputPath.value = window.location.pathname // Например, "/admin"
 })
-
 </script>
 
 <style>
