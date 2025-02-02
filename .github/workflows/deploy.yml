@@ -2,10 +2,10 @@ name: deploy app # Название workflow
 on:
   push:
     branches:
-      - main # Запускаем процесс при пуше в ветку main
+      - main # Запускаем процесс при push в ветку main
 
 jobs:
-  build: # Джоб для сборки приложения
+  build: # job для сборки приложения
     runs-on: ubuntu-latest # Используем виртуальную машину с Ubuntu последней версии
 
     steps:
@@ -33,43 +33,39 @@ jobs:
       - name: Build # Собираем проект
         run: npm run build
 
-      - name: Upload production code # Загружаем артефакт сборки
+      - name: Prepare backend files # Копируем backend файлы в dist/api
+        run: |
+          mkdir -p dist/api
+          cp -r backend/* dist/api/
+
+      - name: Upload frontend artifact # Загружаем артефакт фронтенда
         uses: actions/upload-artifact@v4
         with:
-          name: production-code # Название артефакта
+          name: frontend-code # Название артефакта
           path: dist # Загружаем содержимое папки dist (финальная сборка)
 
-  copyapi:
-    runs-on: ubuntu-latest  # Этот job не зависит от других
-    needs: build # Ждем завершения задачи build перед выполнением copyapi
+      - name: Upload backend artifact # Загружаем артефакт бэкенда
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-code # Название артефакта
+          path: dist/api # Загружаем содержимое папки dist/api
 
-    steps:
-      - name: Checkout code for backend
-        uses: actions/checkout@v4
-
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: Copy backend files to remote server # Копируем бэк файлы на сервер
-        run: |
-          rsync -avz --delete \
-            -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
-            backend/ \
-            ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin/api
-
-  deploy: # Джоб для развертывания на сервере
-    needs: copyapi # Ждем завершения задачи copyapi перед выполнением deploy
+  deploy: # job для развертывания на сервере
+    needs: build # Ждем завершения задачи build перед выполнением deploy
     runs-on: ubuntu-latest # Запускаем на Ubuntu
 
     steps:
-      - name: Download production code # Загружаем артефакт сборки
+      - name: Download frontend artifact # Загружаем артефакт фронтенда
         uses: actions/download-artifact@v4
         with:
-          name: production-code # Загружаем артефакт с таким же именем
+          name: frontend-code # Загружаем артефакт с таким же именем
           path: dist # Помещаем в локальную папку dist
+
+      - name: Download backend artifact # Загружаем артефакт бэкенда
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-code # Загружаем артефакт с таким же именем
+          path: dist/api # Помещаем в локальную папку dist/api
 
       - name: Setup SSH # Настраиваем SSH-доступ
         run: |
@@ -84,10 +80,10 @@ jobs:
             exit 1  # Прерываем выполнение, если dist/ пустая
           fi
           
-      - name: Copy frontend files to remote server # Копируем фронт файлы на сервер
+      - name: Copy frontend and backend files to remote server # Копируем файлы на сервер
         run: |
-          # Копируем только фронтенд, исключая папку /admin/api
-          rsync -avz --delete --exclude '/admin/api' \
+          # Копируем фронтенд и backend в /admin и /admin/api соответственно
+          rsync -avz --delete \
             -e "ssh -p ${{ secrets.SERVER_PORT }} -o StrictHostKeyChecking=no" \
             dist/ \
             ${{ secrets.USER_LOGIN }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/admin
