@@ -3,9 +3,12 @@ on:
   push:
     branches:
       - main # Запускаем процесс при push в ветку main
+    paths-ignore:
+      - 'docs/**' # Игнорируем изменения в папке docs
 
 jobs:
   build: # job для сборки приложения
+    if: startsWith(github.event.head_commit.message, 'actions') # Фильтр запуск только при коммитах, начинающихся с "actions"
     runs-on: ubuntu-latest # Используем виртуальную машину с Ubuntu последней версии
 
     steps:
@@ -51,6 +54,7 @@ jobs:
           path: dist/api # Загружаем содержимое папки dist/api
 
   deploy: # job для развертывания на сервере
+    if: startsWith(github.event.head_commit.message, 'actions') # Фильтр запуск только при коммитах, начинающихся с "actions"
     needs: build # Ждем завершения задачи build перед выполнением deploy
     runs-on: ubuntu-latest # Запускаем на Ubuntu
 
