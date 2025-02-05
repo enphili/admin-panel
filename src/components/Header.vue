@@ -22,12 +22,8 @@
           <span class="slider"></span>
         </label>
       </div>
-      <AppButton text="Сохранить" class="filled-btn" />
-      <AppButton
-        text="Выйти"
-        class="outline-btn"
-        @click="handleLogout"
-      />
+      <AppButton text="Сохранить" class="filled-btn" @click="handleSave" />
+      <AppButton text="Выйти" class="outline-btn" @click="handleLogout" />
     </div>
   </header>
 
@@ -38,22 +34,23 @@
     @confirm="confirmLogout"
     @close="showLogoutConfirmation = false"
   />
-
-
 </template>
 
 <script setup lang="ts">
 import AppButton from './ui/AppButton.vue'
 import AppModalDialog from './ui/AppModalDialog.vue'
+import { useNotification } from "@kyvg/vue3-notification"
 import {initTheme, toggleTheme} from '../use/useTheme.ts'
 import { useAppStore } from '../store'
 import {ref} from 'vue'
+import {SettingsService} from '../service/SettingsService.ts'
 
 defineProps<{
   operationTitle: string
 }>()
 
 const store = useAppStore()
+const { notify }  = useNotification()
 const showLogoutConfirmation = ref(false)
 const logoutTitle = ref('')
 const logoutMessage = ref('')
@@ -61,11 +58,13 @@ const logoutMessage = ref('')
 const isDarkMode = initTheme()
 
 // Функция выхода из системы
-const logoutAndRedirect = () => window.location.replace('/')
+const logoutAndRedirect = () => window.location.replace('/') //fixme предусмотреть уничтожение сессии
+
 const confirmLogout = () => {
   showLogoutConfirmation.value = true
   logoutAndRedirect()
 }
+
 const handleLogout = () => {
   if (store.hasChanges) {
     showLogoutConfirmation.value = true
@@ -77,7 +76,58 @@ const handleLogout = () => {
   }
 }
 
+const handleSave = async () => {
+  try {
+    if (!store.hasChanges) { // Проверка наличия изменений
+      notify({
+        title: 'Сохранение',
+        text: 'Нет изменений для сохранения',
+        type: 'warn',
+      })
+      return
+    }
 
+    // Сбор данных для отправки
+    const payload: Record<string, string> = {}
+
+    if (store.settings.path !== window.location.pathname) {
+      let path = store.settings.path.trim()
+      path = path.replace(/^\/+|\/+$/g, '') // Убираем все `/` в начале и конце
+      if (path) payload.path = path
+    }
+
+    if (store.settings.login.trim() !== '') {
+      payload.login = store.settings.login.trim()
+    }
+
+    if (store.settings.password.trim() !== '') {
+      payload.password = store.settings.password.trim()
+    }
+
+    if (store.csrfToken !== '') {
+      payload.csrf_token = store.csrfToken
+    }
+
+    await SettingsService.saveSettings(payload)
+
+    notify({
+      title: 'Сохранение',
+      text: 'Настройки успешно сохранены',
+      type: 'success'
+    })
+
+    // Сбрасываем флаг изменений
+    store.setHasChanges(false)
+
+  } catch (error) {
+    console.dir(error) //fixme удалить строку
+    notify({
+      title: 'Сохранение',
+      text: `${error instanceof Error ? error.message : 'При сохранении возникла неизвестная ошибка'}`,
+      type: 'error',
+    })
+  }
+}
 
 </script>
 

@@ -52,21 +52,23 @@
 
 <script setup lang="ts">
 import AppButton from '../components/ui/AppButton.vue'
-import {computed, ref} from 'vue'
+import {computed, onMounted, ref} from 'vue'
 import {useValidation} from '../use/auth/useValidation.ts'
-import {AuthService} from '../auth/AuthService.ts'
+import {AuthService} from '../service/AuthService.ts'
 import { useNotification } from "@kyvg/vue3-notification"
+import { useAppStore } from '../store'
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
 }>()
 
-// Локальные состояния
+const store = useAppStore()
 const username = ref('')
 const password = ref('')
 const isPasswordHidden = ref(true)
 const isLoading = ref(false)
 const authErrorMessage = ref('')
+const { notify }  = useNotification()
 
 // Флаги "трогали ли поля"
 const isUsernameTouched = ref(false)
@@ -78,10 +80,14 @@ const img = computed(() => isPasswordHidden.value
   : `${import.meta.env.BASE_URL}image/eye-off.svg`
 )
 
-const { notify }  = useNotification()
-
 // Валидация полей
-const validation = computed(() => useValidation(username.value, password.value))
+const validation = computed(() => useValidation(
+  username.value,
+  password.value,
+  false,
+  false,
+  false
+))
 // Отображаем ошибку только если поле ввода было в фокусе
 const loginError = computed(() => isUsernameTouched.value ? validation.value.loginError : '')
 const passwordError = computed(() => isPasswordTouched.value ? validation.value.passwordError : '')
@@ -100,6 +106,11 @@ const handleLogin = async () => {
 
   try {
     const authService = new AuthService(username.value, password.value, emit)
+
+    // Получаем CSRF-токен
+    await authService.fetchCsrfToken()
+
+    // Выполняем авторизацию
     const result = await authService.loginToServer()
 
     if (result.success) {
@@ -123,6 +134,9 @@ const handleLogin = async () => {
   }
 }
 
+onMounted(() => {
+  store.initialize() // Инициализация приложения
+});
 </script>
 
 <style>

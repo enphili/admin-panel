@@ -7,7 +7,6 @@
       type="text"
       placeholder="введите путь до панели"
       v-model="inputPath"
-      @input="validatePath"
     >
     <span v-if="pathErrorMessage" class="validate-text validate-path">{{ pathErrorMessage }}</span>
   </label>
@@ -20,7 +19,6 @@
       type="text"
       placeholder="введите логин"
       v-model="reLogin"
-      @input="validateLogin"
     >
     <span v-if="loginErrorMessage" class="validate-text validate-path">{{ loginErrorMessage }}</span>
   </label>
@@ -33,7 +31,6 @@
       type="text"
       placeholder="введите пароль"
       v-model="rePassword"
-      @input="validatePassword"
     >
     <span v-if="passwordErrorMessage" class="validate-text validate-path">{{ passwordErrorMessage }}</span>
   </label>
@@ -42,39 +39,43 @@
 
 <script setup lang="ts">
 import { useAppStore } from '../../store'
-import {ref, onMounted, watch, computed} from 'vue'
+import {ref, watch, computed, onMounted} from 'vue'
+import { useValidation } from '../../use/auth/useValidation.ts'
 
-const inputPath = ref('')
-const originalPath = ref('') // Тут хранится исходное значение пути
-const reLogin = ref('')
-const rePassword = ref('')
+const store = useAppStore() //
 const pathErrorMessage = ref('')
 const loginErrorMessage = ref('')
 const passwordErrorMessage = ref('')
+const validPathRegex = /^[a-zA-Z0-9_/-]+$/ // Регулярное выражение для допустимых символов в пути
 
-// Регулярное выражение для допустимых символов
-const validPathRegex = /^[a-zA-Z0-9_/-]+$/
-const validPasswordRegex = /^[a-zA-Z0-9!@#$%^&*]*$/
-
-const store = useAppStore()
-
-// Функция для проверки изменений
-const hasChanges = computed(() => {
-  return (
-    inputPath.value !== originalPath.value ||  // Изменился ли путь
-    reLogin.value.trim() !== '' ||            // Было пусто → стало не пусто
-    rePassword.value.trim() !== ''            // Было пусто → стало не пусто
-  )
+// Связываем поле inputPath с хранилищем
+const inputPath = computed({
+  get: () => store.settings.path,
+  set: value => store.settings.path = value
 })
 
-// Следим за изменениями полей
-watch(hasChanges, value => {
-  store.setHasChanges(value)
-}, { immediate: true })
+// Связываем поле reLogin с хранилищем
+const reLogin = computed({
+  get: () => store.settings.login.trim(),
+  set: value => store.settings.login = value.trim()
+})
+
+// Связываем поле rePassword с хранилищем
+const rePassword = computed({
+  get: () => (store.settings.password || '').trim(),
+  set: value => store.settings.password = value.trim()
+})
+
+// Функция для проверки изменений
+const checkChanges = computed(() => {
+  return inputPath.value !== store.initialSettings.path
+    || reLogin.value !== store.initialSettings.login
+    || rePassword.value !== store.initialSettings.password
+})
 
 const validatePath = () => {
   if (inputPath.value === '') {
-    pathErrorMessage.value = ''
+    pathErrorMessage.value = 'Путь не может быть пустым'
     return
   }
 
@@ -85,37 +86,22 @@ const validatePath = () => {
 
   pathErrorMessage.value = ''
 }
-const validateLogin = () => {
-  if (reLogin.value === '') {
-    loginErrorMessage.value = ''
-    return
-  }
 
-  if (!validPathRegex.test(reLogin.value)) {
-    loginErrorMessage.value = 'Разрешены только латинские буквы, цифры и `_`, `-`'
-    return
-  }
-
-  loginErrorMessage.value = ''
-}
-const validatePassword = () => {
-  if (rePassword.value === '') {
-    passwordErrorMessage.value = ''
-    return
-  }
-
-  if (!validPasswordRegex.test(rePassword.value)) {
-    passwordErrorMessage.value = 'Пароль должен содержать только латинские буквы, цифры, символы !@#$%^&*'
-    return
-  }
-
-  passwordErrorMessage.value = ''
+const validateAll = () => {
+  const validation = useValidation(reLogin.value, rePassword.value, true, true, true)
+  validatePath()
+  loginErrorMessage.value = validation.loginError
+  passwordErrorMessage.value = validation.passwordError
+  store.setHasChanges(checkChanges.value)
 }
 
-// На момент монтирования компонента определяем текущий путь и сохраняем его как оригинальный
+// Следим за изменениями полей
+watch([inputPath, reLogin, rePassword], () => validateAll())
+
 onMounted(() => {
-  originalPath.value = inputPath.value = window.location.pathname // Например, "/admin"
+  store.setInitialSettings() // Запоминаем начальные настройки
 })
+
 </script>
 
 <style>

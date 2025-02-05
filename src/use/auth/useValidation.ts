@@ -4,8 +4,13 @@ const nonLatinPattern = /[^a-zA-Z0-9_-]/ // Проверяет, есть ли н
 const russianLettersPattern = /[а-яёА-ЯЁ]/ // Проверяет наличие русских букв
 
 // Функция валидации логина
-const validateLogin = (login: string): { isValid: boolean, message: string } => {
-  // Проверка на не пустой логин
+const validateLogin = (login: string, allowEmpty: boolean = false): { isValid: boolean, message: string } => {
+  // Если поле пустое и пустое значение разрешено
+  if (!login && allowEmpty) {
+    return { isValid: true, message: '' }
+  }
+  
+  // Если поле пустое, но пустое значение запрещено
   if (!login) {
     return { isValid: false, message: 'Поле логина не может быть пустым.' }
   }
@@ -24,7 +29,12 @@ const validateLogin = (login: string): { isValid: boolean, message: string } => 
 }
 
 // Функция валидации пароля
-const validatePassword = (password: string): { isValid: boolean, message: string } => {
+const validatePassword = (password: string, detailedErrors: boolean = false, allowEmpty: boolean = false): { isValid: boolean, message: string } => {
+  // Если поле пустое и пустое значение разрешено
+  if (!password && allowEmpty) {
+    return { isValid: true, message: '' }
+  }
+  
   if (!password) {
     return { isValid: false, message: 'Пароль не может быть пустым.' }
   }
@@ -34,38 +44,57 @@ const validatePassword = (password: string): { isValid: boolean, message: string
     return { isValid: true, message: '' }
   }
   
-  // Длина пароля
-  if (password.length < 6) {
-    return { isValid: false, message: 'Пароль должен быть не менее 6 символов.' }
+  const errors = []
+  // Проверка на недопустимые символы
+  if (!/^[-a-zA-Z0-9!@#$%^&*]+$/.test(password)) {
+    errors.push('В пароле разрешены только латинские буквы, цифры и специальные символы.')
   }
   
-  // Проверка на наличие заглавной буквы
+  // Проверка длины
+  if (password.length < 5) {
+    errors.push('Пароль должен быть не менее 5 символов.')
+  }
+  
+  // Проверка на заглавные буквы
   if (!/[A-Z]/.test(password)) {
-    return { isValid: false, message: 'Пароль должен содержать хотя бы одну заглавную букву.' }
+    errors.push('Пароль должен содержать хотя бы одну заглавную букву.')
   }
   
-  // Проверка на наличие строчной буквы
+  // Проверка на строчные буквы
   if (!/[a-z]/.test(password)) {
-    return { isValid: false, message: 'Пароль должен содержать хотя бы одну строчную букву.' }
+    errors.push('Пароль должен содержать хотя бы одну строчную букву.')
   }
   
-  // Проверка на наличие хотя бы одной цифры
+  // Проверка на цифры
   if (!/\d/.test(password)) {
-    return { isValid: false, message: 'Пароль должен содержать хотя бы одну цифру.' }
+    errors.push('Пароль должен содержать хотя бы одну цифру.')
   }
   
-  // Проверка на наличие хотя бы одного специального символа
-  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
-    return { isValid: false, message: 'Пароль должен содержать хотя бы один специальный символ.' }
+  // Проверка на специальные символы
+  if (!/[!@#$%^&*-]/.test(password)) {
+    errors.push('Пароль должен содержать хотя бы один специальный символ.')
+  }
+  
+  if (errors.length > 0) {
+    return {
+      isValid: false,
+      message: detailedErrors ? errors.join(' ') : 'Пароль не соответствует требованиям безопасности.'
+    };
   }
   
   return { isValid: true, message: '' }
 }
 
 // Хук для валидации
-export const useValidation = (login: string, password: string) => {
-  const loginError = validateLogin(login)
-  const passwordError = validatePassword(password)
+export const useValidation = (
+  login: string,
+  password: string,
+  detailedErrors: boolean = false,
+  allowEmptyLogin: boolean = false,
+  allowEmptyPassword: boolean = false
+) => {
+  const loginError = validateLogin(login, allowEmptyLogin)
+  const passwordError = validatePassword(password, detailedErrors, allowEmptyPassword)
   
   return {
     isLoginValid: loginError.isValid,
