@@ -96,9 +96,9 @@ const validateAll = () => {
   store.setHasChanges(checkChanges.value)
 }
 
-// Функция для удаления слешей при потере фокуса
+// Функция для удаления '/' при потере фокуса
 const sanitizePath = () => {
-  store.settings.path = inputPath.value.replace(/\//g, '') // Удаляем все слеши
+  store.settings.path = inputPath.value.replace(/\//g, '') // Удаляем все '/'
   validatePath() // Проверяем валидность после очистки
 }
 

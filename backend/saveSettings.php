@@ -64,78 +64,47 @@ if (!empty($errors)) {
 }
 
 try {
-    // Обработка пути (переименование папки)
-    if ($path) {
-        // Путь к текущей папке приложения
-        $currentFolder = basename(dirname(__DIR__)); // Получаем имя текущей папки админки
-
-        // Корневая папка сайта
-        $rootPath = realpath(__DIR__ . '/../../..');
+    if ($path) { // Обработка пути (переименование папки)
+        // Определение пути к папке админки
+        $adminFolderPath = __DIR__ . '/../'; // Путь к папке admin относительно api
+        $adminFolderName = basename(realpath($adminFolderPath)); // Имя папки админки (например, "admin")
+        $rootPath = realpath(dirname(realpath($adminFolderPath))); // Корневой путь к сайту
 
         // Полный путь к текущей папке админки
-        $currentPath = $rootPath . DIRECTORY_SEPARATOR . $currentFolder;
+        $currentPath = $rootPath . DIRECTORY_SEPARATOR . $adminFolderName;
 
         // Формируем новый путь
-        $newPath = realpath($rootPath) . DIRECTORY_SEPARATOR . trim($_POST['path'], '/');
-
-        // Логирование путей
-        error_log("currentFolder: " . $currentFolder);
-        error_log("rootPath: " . $rootPath);
-        error_log("currentPath: " . $currentPath);
-        error_log("newPath: " . $newPath);
+        $newPath = $rootPath . DIRECTORY_SEPARATOR . trim($_POST['path'], '/');
 
         // Проверка существования текущей папки
         if (!is_dir($currentPath)) {
-            error_log("Current folder does not exist: " . $currentPath);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Текущая папка админки не найдена.',
-                'isLogin' => true
-            ]);
-            exit;
+            throw new Exception('Текущая папка админки не найдена.');
         }
 
         // Проверяем, что новая папка не существует
         if (file_exists($newPath)) {
-            echo json_encode([
-                 'success' => false,
-                 'message' => 'Папка с таким именем уже существует.',
-                 'isLogin' => true
-            ]);
-            exit;
+            throw new Exception('Папка с таким именем уже существует.');
         }
 
         // Переименовываем папку
         if (!rename($currentPath, $newPath)) {
-        $errorMessage = error_get_last()['message'] ?? 'Неизвестная ошибка';
-            echo json_encode([
-                'success' => false,
-                'message' => 'Не удалось переименовать папку. Ошибка: ' . $errorMessage,
-                'isLogin' => true
-            ]);
-            exit;
+            $errorMessage = error_get_last()['message'] ?? 'Неизвестная ошибка';
+            throw new Exception('Не удалось переименовать папку. Ошибка: ' . $errorMessage);
         }
+
+        // Обновляем путь к файлу настроек
+        $settingsFile = $newPath . '/api/setting.json'; // Новый путь к файлу настроек
     }
 
     // Обновление логина и пароля
     if ($login || $password) {
         // Читаем текущие настройки
         if (!file_exists($settingsFile)) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Файл настроек не найден.',
-                'isLogin' => true
-            ]);
-            exit;
+            throw new Exception('Файл настроек не найден.');
         }
         $settings = json_decode(file_get_contents($settingsFile), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Ошибка чтения файла настроек.',
-                'isLogin' => true
-            ]);
-            exit;
+            throw new Exception('Ошибка чтения файла настроек.');
         }
 
         // Обновляем логин и пароль
@@ -150,22 +119,25 @@ try {
         $tempFile = $settingsFile . '.tmp';
         file_put_contents($tempFile, json_encode($settings, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         rename($tempFile, $settingsFile);
-
-        // Логирование изменений
-        error_log("Настройки обновлены пользователем: " . json_encode($_POST));
     }
 
+    // Успешное завершение
     echo json_encode([
         'success' => true,
         'message' => 'Настройки успешно сохранены.',
         'isLogin' => true
     ]);
 } catch (Exception $e) {
+    // Возвращаем ошибку в формате JSON
+    http_response_code(500); // Устанавливаем код ошибки
     echo json_encode([
         'success' => false,
-        'message' => 'Ошибка сервера: ' . $e->getMessage(),
+        'message' => 'Ошибка: ' . $e->getMessage(),
         'isLogin' => true
     ]);
+
+    // Логирование ошибки
+    error_log('Ошибка при сохранении настроек: ' . $e->getMessage());
 }
 
 
