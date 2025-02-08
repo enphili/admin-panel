@@ -23,12 +23,12 @@ export const useAppStore = defineStore('appState', {
   state: (): State => ({
     hasChanges: false, // флаг показывающий были ли пользователем внесены какие-либо изменения
     settings: { // изменения на вкладке Настройка
-      path: window.location.pathname, // храним начальный путь расположения приложения
+      path: window.location.pathname.replace(/^\/|\/$/g, ''), // храним начальный путь расположения приложения без слешей
       login: '', // начальное значение логина
       password: '' // временное хранение только на время сессии
     },
     initialSettings: {
-      path: window.location.pathname,
+      path: window.location.pathname.replace(/^\/|\/$/g, ''), // Удаляем слеши с обоих концов
       login: '',
       password: ''
     },

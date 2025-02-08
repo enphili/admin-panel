@@ -7,6 +7,7 @@
       type="text"
       placeholder="введите путь до панели"
       v-model="inputPath"
+      @blur="sanitizePath"
     >
     <span v-if="pathErrorMessage" class="validate-text validate-path">{{ pathErrorMessage }}</span>
   </label>
@@ -38,9 +39,9 @@
 </template>
 
 <script setup lang="ts">
-import { useAppStore } from '../../store'
-import {ref, watch, computed, onMounted} from 'vue'
-import { useValidation } from '../../use/auth/useValidation.ts'
+import {useAppStore} from '../../store'
+import {computed, onMounted, ref, watch} from 'vue'
+import {useValidation} from '../../use/auth/useValidation.ts'
 
 const store = useAppStore() //
 const pathErrorMessage = ref('')
@@ -93,6 +94,12 @@ const validateAll = () => {
   loginErrorMessage.value = validation.loginError
   passwordErrorMessage.value = validation.passwordError
   store.setHasChanges(checkChanges.value)
+}
+
+// Функция для удаления слешей при потере фокуса
+const sanitizePath = () => {
+  store.settings.path = inputPath.value.replace(/\//g, '') // Удаляем все слеши
+  validatePath() // Проверяем валидность после очистки
 }
 
 // Следим за изменениями полей
