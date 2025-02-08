@@ -120,7 +120,6 @@ const handleSave = async () => {
     store.setHasChanges(false)
 
   } catch (error) {
-    console.dir(error) //fixme удалить строку
     notify({
       title: 'Сохранение',
       text: `${error instanceof Error ? error.message : 'При сохранении возникла неизвестная ошибка'}`,
