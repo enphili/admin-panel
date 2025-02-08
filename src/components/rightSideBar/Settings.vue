@@ -50,10 +50,8 @@ const passwordErrorMessage = ref('')
 const validPathRegex = /^[a-zA-Z0-9_/-]+$/ // Регулярное выражение для допустимых символов в пути
 
 // Связываем поле inputPath с хранилищем
-const inputPath = computed({
-  get: () => store.settings.path,
-  set: value => store.settings.path = value
-})
+const initialPath = computed(() => store.initialSettings.path) // Исходное значение пути
+const inputPath = ref(initialPath.value) // Локальная копия значения поля
 
 // Связываем поле reLogin с хранилищем
 const reLogin = computed({
@@ -69,41 +67,77 @@ const rePassword = computed({
 
 // Функция для проверки изменений
 const checkChanges = computed(() => {
-  return inputPath.value !== store.initialSettings.path
-    || reLogin.value !== store.initialSettings.login
-    || rePassword.value !== store.initialSettings.password
+  return (
+    inputPath.value !== '' && inputPath.value !== initialPath.value // Проверка пути
+    || reLogin.value !== store.initialSettings.login // Проверка логина
+    || rePassword.value !== store.initialSettings.password // Проверка пароля
+  )
 })
 
+// Функция для валидации пути
 const validatePath = () => {
   if (inputPath.value === '') {
-    pathErrorMessage.value = 'Путь не может быть пустым'
-    return
+    // Если поле пустое, считаем валидацию успешной
+    pathErrorMessage.value = ''
+    return true
   }
 
   if (!validPathRegex.test(inputPath.value)) {
     pathErrorMessage.value = 'Разрешены только латинские буквы, цифры и `_`, `-`, `/`'
-    return
+    return false
   }
 
   pathErrorMessage.value = ''
+  return true
 }
 
-const validateAll = () => {
-  const validation = useValidation(reLogin.value, rePassword.value, true, true, true)
-  validatePath()
-  loginErrorMessage.value = validation.loginError
-  passwordErrorMessage.value = validation.passwordError
-  store.setHasChanges(checkChanges.value)
-}
-
-// Функция для удаления '/' при потере фокуса
+// Обработчик потери фокуса для inputPath
 const sanitizePath = () => {
-  store.settings.path = inputPath.value.replace(/\//g, '') // Удаляем все '/'
+  if (inputPath.value.trim() === '') {
+    // Если поле пустое, сбрасываем значение к исходному
+    pathErrorMessage.value = '' // Очищаем сообщение об ошибке
+    inputPath.value = ''
+    store.settings.path = initialPath.value
+    return
+  }
+
+  // Иначе очищаем '/' и обновляем store
+  const sanitizedValue = inputPath.value.replace(/\//g, '')
+  inputPath.value = sanitizedValue
+  store.settings.path = sanitizedValue
+
   validatePath() // Проверяем валидность после очистки
 }
 
+// Функция для валидации логина
+const validateLogin = () => {
+  if (reLogin.value.trim() === '') {
+    loginErrorMessage.value = ''
+    return true
+  }
+  const validation = useValidation(reLogin.value, rePassword.value, true, true, true)
+  loginErrorMessage.value = validation.loginError
+  return !validation.loginError
+}
+
+// Функция для валидации пароля
+const validatePassword = () => {
+  if (rePassword.value.trim() === '') {
+    passwordErrorMessage.value = ''
+    return true
+  }
+  const validation = useValidation(reLogin.value, rePassword.value, true, true, true)
+  passwordErrorMessage.value = validation.passwordError
+  return !validation.passwordError
+}
+
 // Следим за изменениями полей
-watch([inputPath, reLogin, rePassword], () => validateAll())
+watch([ inputPath, reLogin, rePassword], () => {
+  store.setHasChanges(checkChanges.value) // Устанавливаем флаг hasChanges
+  validatePath() // Валидация пути
+  validateLogin() // Проверка логина
+  validatePassword() // Проверка пароля
+})
 
 onMounted(() => {
   store.setInitialSettings() // Запоминаем начальные настройки

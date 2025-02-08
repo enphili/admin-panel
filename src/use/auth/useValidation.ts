@@ -4,25 +4,33 @@ const nonLatinPattern = /[^a-zA-Z0-9_-]/ // Проверяет, есть ли н
 const russianLettersPattern = /[а-яёА-ЯЁ]/ // Проверяет наличие русских букв
 
 // Функция валидации логина
-const validateLogin = (login: string, allowEmpty: boolean = false): { isValid: boolean, message: string } => {
-  // Если поле пустое и пустое значение разрешено
-  if (!login && allowEmpty) {
+const validateLogin = (login: string, detailedErrors: boolean = false, allowEmpty: boolean = false): { isValid: boolean, message: string } => {
+  if (!login && allowEmpty) { // Если поле пустое и пустое значение разрешено
     return { isValid: true, message: '' }
   }
   
-  // Если поле пустое, но пустое значение запрещено
-  if (!login) {
+  if (!login) { // Если поле пустое, но пустое значение запрещено
     return { isValid: false, message: 'Поле логина не может быть пустым.' }
   }
   
-  // Проверка на русские буквы
-  if (russianLettersPattern.test(login)) {
-    return { isValid: false, message: 'Логин должен содержать только буквы латинского алфавита' }
+  const errors = []
+  if (russianLettersPattern.test(login)) { // Проверка на русские буквы
+    errors.push('Логин должен содержать только буквы латинского алфавита')
   }
   
-  // Проверка на запрещённые символы
-  if (nonLatinPattern.test(login)) {
-    return { isValid: false, message: 'В логин разрешены только символы "_" и "-".' }
+  if (nonLatinPattern.test(login)) { // Проверка на запрещённые символы
+    errors.push('В логин разрешены только символы "_" и "-".')
+  }
+  
+  if (login.length < 4) { // длина логина не менее 4
+    errors.push('Логин должен быть не менее 4 символов')
+  }
+  
+  if (errors.length > 0) {
+    return {
+      isValid: false,
+      message: detailedErrors ? errors.join(' ') : 'Логин не соответствует требованиям безопасности.'
+    }
   }
   
   return { isValid: true, message: '' }
@@ -30,17 +38,15 @@ const validateLogin = (login: string, allowEmpty: boolean = false): { isValid: b
 
 // Функция валидации пароля
 const validatePassword = (password: string, detailedErrors: boolean = false, allowEmpty: boolean = false): { isValid: boolean, message: string } => {
-  // Если поле пустое и пустое значение разрешено
-  if (!password && allowEmpty) {
+  if (!password && allowEmpty) { // Если поле пустое и пустое значение разрешено
     return { isValid: true, message: '' }
   }
   
-  if (!password) {
+  if (!password) { // Если поле пустое, но пустое значение запрещено
     return { isValid: false, message: 'Пароль не может быть пустым.' }
   }
   
-  // Исключение для пароля "admin"
-  if (password === 'admin') {
+  if (password === 'admin') { // Исключение для пароля "admin"
     return { isValid: true, message: '' }
   }
   
@@ -79,7 +85,7 @@ const validatePassword = (password: string, detailedErrors: boolean = false, all
     return {
       isValid: false,
       message: detailedErrors ? errors.join(' ') : 'Пароль не соответствует требованиям безопасности.'
-    };
+    }
   }
   
   return { isValid: true, message: '' }
@@ -93,7 +99,7 @@ export const useValidation = (
   allowEmptyLogin: boolean = false,
   allowEmptyPassword: boolean = false
 ) => {
-  const loginError = validateLogin(login, allowEmptyLogin)
+  const loginError = validateLogin(login, detailedErrors, allowEmptyLogin)
   const passwordError = validatePassword(password, detailedErrors, allowEmptyPassword)
   
   return {
