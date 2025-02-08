@@ -15,21 +15,21 @@ const validateLogin = (login: string, detailedErrors: boolean = false, allowEmpt
   
   const errors = []
   if (russianLettersPattern.test(login)) { // Проверка на русские буквы
-    errors.push('Логин должен содержать только буквы латинского алфавита')
+    errors.push('Только латинский алфавит.')
   }
   
   if (nonLatinPattern.test(login)) { // Проверка на запрещённые символы
-    errors.push('В логин разрешены только символы "_" и "-".')
+    errors.push('Только символы "_" и "-".')
   }
   
   if (login.length < 4) { // длина логина не менее 4
-    errors.push('Логин должен быть не менее 4 символов')
+    errors.push('Не менее 4 символов.')
   }
   
   if (errors.length > 0) {
     return {
       isValid: false,
-      message: detailedErrors ? errors.join(' ') : 'Логин не соответствует требованиям безопасности.'
+      message: detailedErrors ? errors.join('<br>') : 'Логин не соответствует требованиям безопасности.'
     }
   }
   
@@ -53,38 +53,38 @@ const validatePassword = (password: string, detailedErrors: boolean = false, all
   const errors = []
   // Проверка на недопустимые символы
   if (!/^[-a-zA-Z0-9!@#$%^&*]+$/.test(password)) {
-    errors.push('В пароле разрешены только латинские буквы, цифры и специальные символы.')
+    errors.push('Только латинский алфавит, цифры и специальные символы.')
   }
   
   // Проверка длины
   if (password.length < 5) {
-    errors.push('Пароль должен быть не менее 5 символов.')
+    errors.push('Не менее 5 символов.')
   }
   
   // Проверка на заглавные буквы
   if (!/[A-Z]/.test(password)) {
-    errors.push('Пароль должен содержать хотя бы одну заглавную букву.')
+    errors.push('Минимум одна заглавная буква.')
   }
   
   // Проверка на строчные буквы
   if (!/[a-z]/.test(password)) {
-    errors.push('Пароль должен содержать хотя бы одну строчную букву.')
+    errors.push('Минимум одна строчная буква.')
   }
   
   // Проверка на цифры
   if (!/\d/.test(password)) {
-    errors.push('Пароль должен содержать хотя бы одну цифру.')
+    errors.push('Минимум одна цифра.')
   }
   
   // Проверка на специальные символы
   if (!/[!@#$%^&*-]/.test(password)) {
-    errors.push('Пароль должен содержать хотя бы один специальный символ.')
+    errors.push('Минимум один специальный символ.')
   }
   
   if (errors.length > 0) {
     return {
       isValid: false,
-      message: detailedErrors ? errors.join(' ') : 'Пароль не соответствует требованиям безопасности.'
+      message: detailedErrors ? errors.join('<br>') : 'Пароль не соответствует требованиям безопасности.'
     }
   }
   

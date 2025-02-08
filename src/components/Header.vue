@@ -61,7 +61,7 @@ const isDarkMode = initTheme()
 const logoutAndRedirect = () => window.location.replace('/') //fixme предусмотреть уничтожение сессии
 
 const confirmLogout = () => {
-  showLogoutConfirmation.value = true
+  showLogoutConfirmation.value = false
   logoutAndRedirect()
 }
 
@@ -69,7 +69,7 @@ const handleLogout = () => {
   if (store.hasChanges) {
     showLogoutConfirmation.value = true
     logoutTitle.value = 'Выход из системы'
-    logoutMessage.value = 'Вы действительно хотите выйти? Все несохраненные данные будут утеряны.'
+    logoutMessage.value = 'Вы действительно хотите выйти? Имеются несохраненные данные которые будут утеряны.'
   }
   else {
     logoutAndRedirect() // выходим сразу
@@ -90,7 +90,7 @@ const handleSave = async () => {
     // Сбор данных для отправки
     const payload: Record<string, string> = {}
 
-    if (store.settings.path !== window.location.pathname) {
+    if (store.settings.path !== store.initialSettings.path) {
       let path = store.settings.path.trim()
       path = path.replace(/^\/+|\/+$/g, '') // Убираем все `/` в начале и конце
       if (path) payload.path = path

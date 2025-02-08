@@ -9,7 +9,7 @@
       v-model="inputPath"
       @blur="sanitizePath"
     >
-    <span v-if="pathErrorMessage" class="validate-text validate-path">{{ pathErrorMessage }}</span>
+    <span v-if="pathErrorMessage" class="validate-text validate-path" v-html="pathErrorMessage"></span>
   </label>
 
   <p class="subtitle">Логин</p>
@@ -21,7 +21,7 @@
       placeholder="введите логин"
       v-model="reLogin"
     >
-    <span v-if="loginErrorMessage" class="validate-text validate-path">{{ loginErrorMessage }}</span>
+    <span v-if="loginErrorMessage" class="validate-text validate-path" v-html="loginErrorMessage"></span>
   </label>
 
   <p class="subtitle">Пароль</p>
@@ -33,7 +33,7 @@
       placeholder="введите пароль"
       v-model="rePassword"
     >
-    <span v-if="passwordErrorMessage" class="validate-text validate-path">{{ passwordErrorMessage }}</span>
+    <span v-if="passwordErrorMessage" class="validate-text validate-path" v-html="passwordErrorMessage"></span>
   </label>
 
 </template>
@@ -102,7 +102,7 @@ const sanitizePath = () => {
   }
 
   // Иначе очищаем '/' и обновляем store
-  const sanitizedValue = inputPath.value.replace(/\//g, '')
+  const sanitizedValue = inputPath.value.replace(/\//g, '').trim()
   inputPath.value = sanitizedValue
   store.settings.path = sanitizedValue
 
