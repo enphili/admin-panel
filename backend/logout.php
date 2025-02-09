@@ -1,21 +1,12 @@
 <?php
 require_once __DIR__ . '/security_headers.php';
 require_once __DIR__ . '/session_config.php';
+require_once __DIR__ . '/csrf_validation.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Получение данных из тела запроса
-$_POST = json_decode(file_get_contents('php://input'), true);
-$csrf_token = isset($_POST["csrf_token"]) ? trim($_POST["csrf_token"]) : null;
-
-// Проверяем, что CSRF-токен передан
-if (!$csrf_token || !isset($_SESSION['csrf_token']) || $csrf_token !== $_SESSION['csrf_token']) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Неверный или отсутствующий CSRF-токен.',
-    ]);
-    exit;
-}
+// Проверяем CSRF-токен
+validateCsrfToken();
 
 // Уничтожение сессии
 session_destroy();
@@ -46,6 +37,7 @@ if (ini_get("session.use_cookies")) {
 }
 
 // Отправка успешного ответа
+http_response_code(200);
 echo json_encode([
     'success' => true,
     'message' => 'Вы успешно вышли.'

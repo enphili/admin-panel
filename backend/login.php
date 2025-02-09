@@ -1,24 +1,17 @@
 <?php
 require_once __DIR__ . '/security_headers.php';
 require_once __DIR__ . '/session_config.php';
+require_once __DIR__ . '/csrf_validation.php';
 
 header('Content-Type: application/json; charset=utf-8');
+
+// Проверяем CSRF-токен
+validateCsrfToken();
 
 // Получение данных из тела запроса
 $_POST = json_decode(file_get_contents('php://input'), true);
 $login = isset($_POST["login"]) ? trim($_POST["login"]) : null;
 $password = isset($_POST["password"]) ? trim($_POST["password"]) : null;
-$csrf_token = isset($_POST["csrf_token"]) ? trim($_POST["csrf_token"]) : null;
-
-// Проверяем, что CSRF-токен передан
-if (!$csrf_token || !isset($_SESSION['csrf_token']) || $csrf_token !== $_SESSION['csrf_token']) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Неверный или отсутствующий CSRF-токен.',
-        'isLogin' => false
-    ]);
-    exit;
-}
 
 // Проверяем, что логин переданы
 if (!$login) {

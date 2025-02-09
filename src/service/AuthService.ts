@@ -84,11 +84,13 @@ export class AuthService {
     try {
       const response = await fetch('api/login.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.csrfToken || '', // Отправляем CSRF-токен в заголовке
+        },
         body: JSON.stringify({
           login: this.login,
-          password: this.password,
-          csrf_token: this.csrfToken
+          password: this.password
         }),
       })
       
