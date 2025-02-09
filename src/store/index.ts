@@ -49,6 +49,21 @@ export const useAppStore = defineStore('appState', {
     
     setHasChanges(val: boolean) {
       this.hasChanges = val
+    },
+    
+    clearUserState() {
+      this.hasChanges = false
+      this.settings = {
+        path: '',
+        login: '',
+        password: ''
+      }
+      this.initialSettings = {
+        path: '',
+        login: '',
+        password: ''
+      }
+      this.csrfToken = ''
     }
   }
 })

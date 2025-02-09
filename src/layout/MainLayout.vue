@@ -66,7 +66,6 @@ const setMenuItem = (menuKey: MenuItemKey) => {
     currentMenuItem.value = menuKey
   }
 }
-
 </script>
 
 <style>

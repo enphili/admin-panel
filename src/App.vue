@@ -15,7 +15,6 @@ initTheme()
 const AuthLayout = defineAsyncComponent(() => import('./layout/AuthLayout.vue'))
 const MainLayout = defineAsyncComponent(() => import('./layout/MainLayout.vue'))
 
-
 // Состояние аутентификации
 const isAuthenticated = ref(false)
 
@@ -26,8 +25,6 @@ const currentComponent = computed(() => (isAuthenticated.value ? MainLayout : Au
 const handleAuthentication = (authenticated: boolean) => {
   isAuthenticated.value = authenticated
 }
-
-
 </script>
 
 <style>

@@ -136,7 +136,7 @@ const handleLogin = async () => {
 
 onMounted(() => {
   store.initialize() // Инициализация приложения
-});
+})
 </script>
 
 <style>

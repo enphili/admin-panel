@@ -44,9 +44,14 @@ import {initTheme, toggleTheme} from '../use/useTheme.ts'
 import { useAppStore } from '../store'
 import {ref} from 'vue'
 import {SettingsService} from '../service/SettingsService.ts'
+import {AuthService} from '../service/AuthService.ts'
 
 defineProps<{
   operationTitle: string
+}>()
+
+const emit = defineEmits<{
+  authenticated: [value: boolean]
 }>()
 
 const store = useAppStore()
@@ -58,7 +63,23 @@ const logoutMessage = ref('')
 const isDarkMode = initTheme()
 
 // Функция выхода из системы
-const logoutAndRedirect = () => window.location.replace('/') //fixme предусмотреть уничтожение сессии
+const logoutAndRedirect = async () => {
+  try {
+    const authService = new AuthService('', '', emit) // Создаем экземпляр AuthService
+    await authService.logout()
+
+    store.clearUserState() // Очистка локального состояния
+
+    window.location.replace('/') // Перенаправление на страницу сайта
+  }
+  catch (error) {
+    notify({
+      title: 'Выход',
+      text: `Ошибка при выходе: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}`,
+      type: 'error'
+    })
+  }
+}
 
 const confirmLogout = () => {
   showLogoutConfirmation.value = false
@@ -127,7 +148,6 @@ const handleSave = async () => {
     })
   }
 }
-
 </script>
 
 <style>

@@ -106,7 +106,34 @@ export class AuthService {
     }
   }
   
-  // Метод для смены пароля
-  async changePassword(oldPassword: string, newPassword: string) {}
-  
+  // Метод для выхода из системы
+  async logout(): Promise<boolean> {
+    try {
+      // Проверяем, что CSRF-токен получен
+      if (!this.csrfToken) {
+        console.warn('CSRF-токен не был получен. Попытка получить заново...')
+        await this.fetchCsrfToken() // Если токена нет, пытаемся получить его снова
+      }
+      
+      const response = await fetch('api/logout.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': this.csrfToken || ''
+        },
+        credentials: 'include',
+      })
+      
+      if (response.ok) {
+        this.emit('authenticated', false) // Уведомляем о выходе из системы
+        return true // Выход успешен
+      } else {
+        throw new Error(`Ошибка при выходе: ${response.statusText}`)
+      }
+    }
+    catch (error) {
+      console.error('Ошибка при выходе:', error)
+      throw error
+    }
+  }
 }
