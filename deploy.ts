@@ -13,10 +13,13 @@ const runCommand = (cmd: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     exec(cmd, { cwd: PROJECT_PATH }, (error, stdout, stderr) => {
       if (error) {
-        console.error(`Ошибка: ${stderr}`)
+        console.error(`❌ Ошибка выполнения команды "${cmd}":`)
+        console.error(`STDOUT: ${stdout}`)
+        console.error(`STDERR: ${stderr}`)
         reject(error)
       } else {
         console.log(stdout)
+        console.log(`✅ Команда "${cmd}" выполнена успешно.`)
         resolve()
       }
     })
@@ -42,6 +45,7 @@ const copyFiles = async (source: string, destination: string, filter?: (file: st
 // Основная функция
 const deploy = async () => {
   try {
+    console.log('Проект находится в:', PROJECT_PATH) // Выводим путь к проекту
     console.log('🚀 Запуск сборки проекта...')
     await runCommand('npm run build')
     
@@ -56,7 +60,13 @@ const deploy = async () => {
     
     console.log('✅ Деплой завершен успешно!')
   } catch (error) {
-    console.error('❌ Ошибка во время деплоя:', error)
+    console.error('❌ Ошибка во время деплоя:')
+    if (error instanceof Error) {
+      console.error(error.message)
+      console.error(error.stack)
+    } else {
+      console.error(error)
+    }
   }
 }
 
