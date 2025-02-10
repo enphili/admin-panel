@@ -1,30 +1,38 @@
 <template>
   <p class="subtitle">Выбрать файл страницы</p>
   <ul class="pages-list">
-    <li
-      v-for="(page, index) in pages"
-      :key="index"
-    >
-
-      <a
-        href="#"
-        class="page-link"
-      >
-        {{ `${index + 1}. ${page}`}}
+    <li v-for="(page, index) in pages" :key="index">
+      <a href="#" class="page-link" @click="openPage(page)">
+        {{ `${(index + 1).toString().padStart(2, '0')}. ${page}` }}
       </a>
-
     </li>
   </ul>
 </template>
 
 <script setup lang="ts">
-const pages = [
-  'index.html',
-  'about.html',
-  'portfolio.html',
-  'contacts.html',
-  'terms.html',
-]
+import { ref, onMounted } from 'vue'
+import { ApiService } from '../../service/ApiService.ts'
+import {handleError} from '../../use/useHandleError.ts'
+import type {ApiResponse} from '../../types/apiResponse.ts'
+
+const pages = ref<string[]>([])
+
+// Функция для загрузки списка страниц с сервера
+const fetchPages = async () => {
+  try {
+    const response: ApiResponse<string[]> = await ApiService.get('api/get_pages.php') // Обновляем список страниц
+    pages.value = response.data
+  } catch (error) {
+    handleError(error, 'Список страниц', 'error')
+  }
+}
+
+const openPage = (page: string) => {console.log(page)}
+
+// Загружаем страницы при монтировании компонента
+onMounted(() => {
+  fetchPages()
+})
 
 </script>
 

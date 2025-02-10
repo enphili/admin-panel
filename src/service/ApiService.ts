@@ -1,5 +1,6 @@
 import { CsrfManager } from './CsrfManager.ts'
 import { handleError } from '../use/useHandleError.ts'
+import type {ApiResponse} from '../types/apiResponse.ts'
 
 export class ApiService {
   private static csrfManager = new CsrfManager()
@@ -10,7 +11,7 @@ export class ApiService {
   }
   
   // Метод для GET-запросов
-  static async get<T>(endpoint: string): Promise<T> {
+  static async get<T>(endpoint: string): Promise<ApiResponse<T>> {
     try {
       const csrfToken = await this.fetchCsrfToken()
       
@@ -26,20 +27,21 @@ export class ApiService {
         throw new Error(`Ошибка HTTP! Статус: ${response.status}`)
       }
       
-      const data = await response.json()
+      const data: ApiResponse<T> = await response.json()
+      
       if (!data.success) {
-        throw new Error(data.message || `Запрос не удался со статусом: ${response.status}`);
+        throw new Error(data.message || `Запрос не удался со статусом: ${response.status}`)
       }
-      return data.result as T
+      
+      return data
     }
     catch (error) {
-      handleError(error, 'GET-запрос', 'error')
       throw error
     }
   }
   
   // Метод для POST-запросов
-  static async post<T>(endpoint: string, payload: Record<string, any>): Promise<T> {
+  static async post<T>(endpoint: string, payload: Record<string, any>): Promise<ApiResponse<T>> {
     try {
       const csrfToken = await this.fetchCsrfToken()
       
@@ -56,12 +58,13 @@ export class ApiService {
         throw new Error(`Ошибка HTTP! Статус: ${response.status}`)
       }
       
-      const data = await response.json()
+      const data: ApiResponse<T> = await response.json()
+      
       if (!data.success) {
         throw new Error(data.message || `Запрос не удался со статусом: ${response.status}`)
       }
       
-      return data.result as T
+      return data
     }
     catch (error) {
       handleError(error, 'POST-запрос', 'error')
