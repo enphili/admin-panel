@@ -1,0 +1,71 @@
+import { CsrfManager } from './CsrfManager.ts'
+import { handleError } from '../use/useHandleError.ts'
+
+export class ApiService {
+  private static csrfManager = new CsrfManager()
+  
+  // доступ к CSRF-токену через CsrfManager
+  private static async fetchCsrfToken(): Promise<string> {
+    return await this.csrfManager.fetchToken()
+  }
+  
+  // Метод для GET-запросов
+  static async get<T>(endpoint: string): Promise<T> {
+    try {
+      const csrfToken = await this.fetchCsrfToken()
+      
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken || '',
+        },
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP! Статус: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      if (!data.success) {
+        throw new Error(data.message || `Запрос не удался со статусом: ${response.status}`);
+      }
+      return data.result as T
+    }
+    catch (error) {
+      handleError(error, 'GET-запрос', 'error')
+      throw error
+    }
+  }
+  
+  // Метод для POST-запросов
+  static async post<T>(endpoint: string, payload: Record<string, any>): Promise<T> {
+    try {
+      const csrfToken = await this.fetchCsrfToken()
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken || '',
+        },
+        body: JSON.stringify(payload),
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка HTTP! Статус: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      if (!data.success) {
+        throw new Error(data.message || `Запрос не удался со статусом: ${response.status}`)
+      }
+      
+      return data.result as T
+    }
+    catch (error) {
+      handleError(error, 'POST-запрос', 'error')
+      throw error
+    }
+  }
+}

@@ -1,4 +1,6 @@
 import { useValidation  } from '../use/auth/useValidation.ts'
+import { CsrfManager } from './CsrfManager.ts'
+import { handleError } from '../use/useHandleError.ts'
 
 type EmitFunction = (event: 'authenticated', payload: boolean) => void
 
@@ -6,7 +8,7 @@ export class AuthService {
   private readonly login: string
   private readonly password: string
   private readonly emit: EmitFunction
-  private csrfToken: string | null = null; // Храним CSRF-токен
+  private csrfManager: CsrfManager
   
   constructor(
     login: string = '', // Значение по умолчанию
@@ -16,29 +18,12 @@ export class AuthService {
     this.login = login
     this.password = password
     this.emit = emit
+    this.csrfManager = new CsrfManager()
   }
   
-  // Метод для получения CSRF-токена
-  async fetchCsrfToken(): Promise<void> {
-    const response = await fetch('api/getCsrfToken.php', {
-      method: 'GET',
-      credentials: 'include', // Передаем куки
-      headers: { 'Content-Type': 'application/json' },
-    });
-    
-    // Если ответ не успешный, выбрасываем ошибку
-    if (!response.ok) {
-      throw new Error(`Ошибка при получении CSRF-токена: ${response.statusText}`);
-    }
-    
-    // Парсим данные и сохраняем токен
-    const data = await response.json()
-    this.csrfToken = data.token // Сохраняем токен
-  }
-  
-  // безопасный способ доступа к приватному свойству csrfToken
-  getCsrfToken(): string | null {
-    return this.csrfToken
+  // доступ к CSRF-токену через CsrfManager
+  async fetchCsrfToken(): Promise<string> {
+    return await this.csrfManager.fetchToken()
   }
   
   // Метод для валидации данных
@@ -62,31 +47,22 @@ export class AuthService {
   }
   
   // Метод для авторизации
-  async loginToServer() {
+  async loginToServer(): Promise<{ success: boolean; message?: string }> {
     // Валидация перед отправкой
     const validation = this.validate(false)
     if (!validation.success) {
-      return {
-        success: false,
-        message: validation.message,
-      }
-    }
-    
-    // Проверяем, что CSRF-токен получен
-    if (!this.csrfToken) {
-      return {
-        success: false,
-        message: 'CSRF-токен не был получен. Пожалуйста, попробуйте снова.',
-      };
+      return { success: false, message: validation.message }
     }
     
     // Если валидация пройдена, выполняем запрос
     try {
+      const csrfToken = await this.fetchCsrfToken()
+      
       const response = await fetch('api/login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': this.csrfToken || '', // Отправляем CSRF-токен в заголовке
+          'X-CSRF-Token': csrfToken || '', // Отправляем CSRF-токен в заголовке
         },
         body: JSON.stringify({
           login: this.login,
@@ -111,30 +87,26 @@ export class AuthService {
   // Метод для выхода из системы
   async logout(): Promise<boolean> {
     try {
-      // Проверяем, что CSRF-токен получен
-      if (!this.csrfToken) {
-        console.warn('CSRF-токен не был получен. Попытка получить заново...')
-        await this.fetchCsrfToken() // Если токена нет, пытаемся получить его снова
-      }
+      const csrfToken = await this.fetchCsrfToken()
       
       const response = await fetch('api/logout.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': this.csrfToken || ''
+          'X-CSRF-Token': csrfToken || ''
         },
         credentials: 'include',
       })
       
-      if (response.ok) {
-        this.emit('authenticated', false) // Уведомляем о выходе из системы
-        return true // Выход успешен
-      } else {
+      if (!response.ok) {
         throw new Error(`Ошибка при выходе: ${response.statusText}`)
       }
+      
+      this.emit('authenticated', false) // Уведомляем о выходе из системы
+      return true // Выход успешен
     }
     catch (error) {
-      console.error('Ошибка при выходе:', error)
+      handleError(error, 'Выход из системы', 'error')
       throw error
     }
   }
