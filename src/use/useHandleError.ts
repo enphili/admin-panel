@@ -1,9 +1,11 @@
 import {notify} from '@kyvg/vue3-notification'
 
-export const handleError = (error: unknown, title: string, type: string): void => {
+export const handleError = (error: unknown, title: string, type: string): string => {
+  const message = error instanceof Error ? error.message : 'Произошла неизвестная ошибка'
   notify({
     title,
-    text: error instanceof Error ? error.message : 'Произошла неизвестная ошибка',
+    text: message,
     type
   })
+  return message
 }
