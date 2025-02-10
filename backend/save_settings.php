@@ -16,6 +16,7 @@ $password = isset($_POST["password"]) ? trim($_POST["password"]) : null;
 
 // Проверяем авторизацию
 if (!isset($_SESSION['isLogin']) || !$_SESSION['isLogin']) {
+    http_response_code(403);
     echo json_encode([
         'success' => false,
         'message' => 'Необходимо авторизоваться.',

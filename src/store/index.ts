@@ -39,8 +39,7 @@ export const useAppStore = defineStore('appState', {
   
   actions: {
     async initialize() {
-      await authService.fetchCsrfToken()
-      this.csrfToken = authService.getCsrfToken() || ''
+      this.csrfToken = await authService.fetchCsrfToken() || ''
     },
     
     setInitialSettings() {

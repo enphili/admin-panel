@@ -57,6 +57,7 @@ import {useValidation} from '../use/auth/useValidation.ts'
 import {AuthService} from '../service/AuthService.ts'
 import { useNotification } from "@kyvg/vue3-notification"
 import { useAppStore } from '../store'
+import {handleError} from '../use/useHandleError.ts'
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
@@ -94,12 +95,11 @@ const passwordError = computed(() => isPasswordTouched.value ? validation.value.
 
 // Функция входа
 const handleLogin = async () => {
-  isUsernameTouched.value = true
-  isPasswordTouched.value = true
+  if (!isUsernameTouched.value) isUsernameTouched.value = true
+  if (!isPasswordTouched.value) isPasswordTouched.value = true
 
-  if (!validation.value.isLoginValid || !validation.value.isPasswordValid) {
-    return
-  }
+  // Проверяем валидность полей перед отправкой
+  if (!validation.value.isLoginValid || !validation.value.isPasswordValid) return
 
   isLoading.value = true
   authErrorMessage.value = ''
@@ -121,12 +121,12 @@ const handleLogin = async () => {
       })
     }
     else {
-      authErrorMessage.value = result.message
+      authErrorMessage.value = result.message || 'Неизвестная ошибка'
       setTimeout(() => authErrorMessage.value = '', 2500)
     }
   }
   catch (error) {
-    authErrorMessage.value = error instanceof Error ? error.message : 'Неизвестная ошибка'
+    authErrorMessage.value = handleError(error, 'Авторизация', 'error')
     setTimeout(() => authErrorMessage.value = '', 2500)
   }
   finally {
