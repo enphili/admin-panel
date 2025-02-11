@@ -36,6 +36,7 @@ export class ApiService {
       return data
     }
     catch (error) {
+      handleError(error, 'GET-запрос', 'error')
       throw error
     }
   }
@@ -71,4 +72,28 @@ export class ApiService {
       throw error
     }
   }
+  
+  //Отдельный метод для загрузки HTML-файлов
+  static async getHtml(path: string): Promise<string> {
+    try {
+      const csrfToken = await this.fetchCsrfToken()
+      
+      const response = await fetch(path, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken || '',
+        }
+      })
+      
+      if (!response.ok) throw new Error(`Ошибка при загрузке файла: ${response.status}`)
+      
+      return await response.text()
+    }
+    catch (error) {
+      handleError(error, 'GET-запрос', 'error')
+      throw error
+    }
+  }
 }
+

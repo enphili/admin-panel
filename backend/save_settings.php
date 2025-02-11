@@ -8,12 +8,6 @@ header('Content-Type: application/json; charset=utf-8');
 // Проверяем CSRF-токен
 validateCsrfToken();
 
-// Получение данных из тела запроса
-$_POST = json_decode(file_get_contents('php://input'), true);
-$path = isset($_POST["path"]) ? trim($_POST["path"]) : null;
-$login = isset($_POST["login"]) ? trim($_POST["login"]) : null;
-$password = isset($_POST["password"]) ? trim($_POST["password"]) : null;
-
 // Проверяем авторизацию
 if (!isset($_SESSION['isLogin']) || !$_SESSION['isLogin']) {
     http_response_code(403);
@@ -24,6 +18,12 @@ if (!isset($_SESSION['isLogin']) || !$_SESSION['isLogin']) {
     ]);
     exit;
 }
+
+// Получение данных из тела запроса
+$_POST = json_decode(file_get_contents('php://input'), true);
+$path = isset($_POST["path"]) ? trim($_POST["path"]) : null;
+$login = isset($_POST["login"]) ? trim($_POST["login"]) : null;
+$password = isset($_POST["password"]) ? trim($_POST["password"]) : null;
 
 // Читаем настройки из файла
 $settingsFile = './setting.json';

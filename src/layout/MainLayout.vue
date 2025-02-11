@@ -41,6 +41,7 @@ import EditeImg from '../components/rightSideBar/EditeImg.vue'
 import Settings from '../components/rightSideBar/Settings.vue'
 import {ref} from 'vue'
 import {handleError} from '../use/useHandleError.ts'
+import { ApiService } from '../service/ApiService.ts'
 
 defineEmits<{
   authenticated: [value: boolean]
@@ -116,8 +117,20 @@ const loadPageInIframe = async (page: string) => {
   const fullPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}` // Формируем URL для iframe
 
   try {
+    // Загружаем содержимое страницы через GET-запрос
+    const htmlContent = await ApiService.getHtml(fullPath)
+
+    // Сохраняем содержимое во временный файл через POST-запрос
+    const saveResponse = await ApiService.post<string>(
+      'api/save_temp_page.php',
+      { html: htmlContent }
+    )
+
+    const tempFile = saveResponse.data
+
+    // Загружаем временный файл в iframe
     if (!adminIframe.value) throw new Error('iframe не найден')
-    await loadIframe(adminIframe.value, fullPath)
+    await loadIframe(adminIframe.value, tempFile)
   }
   catch (error) {
     handleError(error, 'Редактируемая страница', 'error')
