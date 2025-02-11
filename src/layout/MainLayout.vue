@@ -14,9 +14,8 @@
     />
 
     <iframe
-      id="admin-iframe"
+      ref="adminIframe"
       :class="['iframe', {'short': isRightSideBarActive}]"
-      :src="iframeSrc"
     ></iframe>
 
     <div :class="['right-sidebar', {'active': isRightSideBarActive}]">
@@ -41,6 +40,7 @@ import EditeText from '../components/rightSideBar/EditeText.vue'
 import EditeImg from '../components/rightSideBar/EditeImg.vue'
 import Settings from '../components/rightSideBar/Settings.vue'
 import {ref} from 'vue'
+import {handleError} from '../use/useHandleError.ts'
 
 defineEmits<{
   authenticated: [value: boolean]
@@ -66,7 +66,7 @@ const operationTitle = {
   EditeImg: 'Редактирование изображений',
   Settings: 'Настройки панели управления'
 }
-const iframeSrc = ref('')
+const adminIframe = ref<HTMLIFrameElement | null>(null)
 
 // Устанавливаем текущий пункт меню
 const setMenuItem = (menuKey: MenuItemKey) => {
@@ -81,12 +81,49 @@ const setMenuItem = (menuKey: MenuItemKey) => {
   }
 }
 
+// Метод для загрузки iframe
+const loadIframe = (iframe: HTMLIFrameElement, url: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    try {
+      iframe.src = url + "?hash=" + crypto.randomUUID()
+    }
+    catch(error) {
+      reject(error)
+    }
+
+    const maxTime = 60000
+    const interval = 200
+    let timerCount = 0
+
+    const timer = setInterval(() => {
+      if (!iframe.contentDocument || iframe.contentDocument.readyState === 'complete') {
+        clearInterval(timer)
+        resolve()
+      }
+      else if (timerCount * interval > maxTime) {
+        clearInterval(timer)
+        reject(new  Error('Не удалось загрузить iframe'))
+      }
+      timerCount++
+    }, interval)
+  })
+}
+
 // Загружаем выбранную страницу в iframe
-const loadPageInIframe = (page: string) => {
+const loadPageInIframe = async (page: string) => {
   // Нормализуем путь: заменяем \ на / и убираем лишние символы
   const normalizedPath = page.replace(/\\/g, '/').replace('//', '/')
-  iframeSrc.value = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}` // Формируем URL для iframe
+  const fullPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}` // Формируем URL для iframe
+
+  try {
+    if (!adminIframe.value) throw new Error('iframe не найден')
+    await loadIframe(adminIframe.value, fullPath)
+  }
+  catch (error) {
+    handleError(error, 'Редактируемая страница', 'error')
+  }
 }
+
 </script>
 
 <style>
