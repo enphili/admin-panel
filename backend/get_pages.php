@@ -52,7 +52,7 @@ function getHtmlFiles(string $dir, string $rootDirectory, string $excludedFolder
 
         $path = $dir . DIRECTORY_SEPARATOR . $item;
 
-        // Исключаем файлы из папок, начинающихся с точки (например, .osp, .git)
+        // Исключаем файлы и папки, начинающихся с точки (например, .osp, .git)
         if (strpos($item, '.') === 0) {
             continue;
         }
@@ -66,8 +66,9 @@ function getHtmlFiles(string $dir, string $rootDirectory, string $excludedFolder
             // Рекурсивно обрабатываем поддиректории
             $htmlFiles = array_merge($htmlFiles, getHtmlFiles($path, $rootDirectory, $excludedFolder));
         } elseif (pathinfo($item, PATHINFO_EXTENSION) === 'html') {
-            // Добавляем только название файла (без пути)
-            $htmlFiles[] = basename($path);
+            // Добавляем полный путь относительно корневой директории
+            $relativePath = str_replace($rootDirectory, '', $path);
+            $htmlFiles[] = $relativePath;
         }
     }
 

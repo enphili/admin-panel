@@ -74,10 +74,13 @@ html {
   line-height: 1.15;
   -webkit-text-size-adjust: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
   margin: 0;
+  padding: 0;
   font-family: 'Inter', 'Roboto', sans-serif;
   width: 100%;
   height: 100%;
@@ -236,5 +239,8 @@ template {
   display: flex;
   flex-direction: row;
   align-items: center;
+}
+#app {
+  height: 100%;
 }
 </style>

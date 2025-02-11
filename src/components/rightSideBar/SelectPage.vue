@@ -1,8 +1,8 @@
 <template>
   <p class="subtitle">Выбрать файл страницы</p>
   <ul class="pages-list">
-    <li v-for="(page, index) in pages" :key="index">
-      <a href="#" class="page-link" @click="openPage(page)">
+    <li v-for="(page, index) in displayPages" :key="index">
+      <a href="#" class="page-link" @click="openPage(pages[index])">
         {{ `${(index + 1).toString().padStart(2, '0')}. ${page}` }}
       </a>
     </li>
@@ -10,12 +10,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ApiService } from '../../service/ApiService.ts'
 import {handleError} from '../../use/useHandleError.ts'
 import type {ApiResponse} from '../../types/apiResponse.ts'
 
-const pages = ref<string[]>([])
+const emit = defineEmits<{
+  (event: 'selectPage', page: string): void // Эмитируем событие при выборе страницы
+}>()
+
+const pages = ref<string[]>([]) // Полные пути к файлам
 
 // Функция для загрузки списка страниц с сервера
 const fetchPages = async () => {
@@ -27,7 +31,19 @@ const fetchPages = async () => {
   }
 }
 
-const openPage = (page: string) => {console.log(page)}
+// Отображаемые названия файлов (без путей)
+const displayPages = computed(() => {
+  return pages.value.map(page => {
+    // Заменяем все обратные слеши на прямые и извлекаем имя файла
+    const normalizedPath = page.replace(/\\\\/g, '/').replace(/\\/g, '/')
+    return normalizedPath.split('/').pop() || ''
+  })
+})
+
+// Функция для выбора страницы
+const openPage = (page: string) => {
+  emit('selectPage', page) // Эмитируем событие с выбранным файлом
+}
 
 // Загружаем страницы при монтировании компонента
 onMounted(() => {

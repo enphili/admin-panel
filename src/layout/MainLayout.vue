@@ -1,5 +1,4 @@
 <template>
-  <div>
     <Header
       :operationTitle="operationTitle[currentMenuItem]"
     ></Header>
@@ -14,7 +13,11 @@
       :currentMenuItem
     />
 
-    <div :class="['iframe', {'short': isRightSideBarActive}]"></div>
+    <iframe
+      id="admin-iframe"
+      :class="['iframe', {'short': isRightSideBarActive}]"
+      :src="iframeSrc"
+    ></iframe>
 
     <div :class="['right-sidebar', {'active': isRightSideBarActive}]">
       <KeepAlive>
@@ -22,10 +25,10 @@
           v-if="currentMenuItem && menuItems[currentMenuItem]"
           :is="menuItems[currentMenuItem]"
           :key="currentMenuItem"
+          @selectPage="loadPageInIframe"
         />
       </KeepAlive>
     </div>
-  </div>
 </template>
 
 <script setup lang="ts">
@@ -59,12 +62,26 @@ const operationTitle = {
   EditeImg: 'Редактирование изображений',
   Settings: 'Настройки панели управления'
 }
+const iframeSrc = ref('')
 
+// Устанавливаем текущий пункт меню
 const setMenuItem = (menuKey: MenuItemKey) => {
-  if (menuItems[menuKey]) {
-    isRightSideBarActive.value = true
+  if (currentMenuItem.value === menuKey) {
+    // Если выбран тот же пункт меню, скрываем панель
+    isRightSideBarActive.value = false
+    currentMenuItem.value = ''
+  } else {
+    // Если выбран другой пункт меню, показываем панель и обновляем содержимое
+    isRightSideBarActive.value = true // Панель остаётся видимой
     currentMenuItem.value = menuKey
   }
+}
+
+// Загружаем выбранную страницу в iframe
+const loadPageInIframe = (page: string) => {
+  // Нормализуем путь: заменяем \ на / и убираем лишние символы
+  const normalizedPath = page.replace(/\\/g, '/').replace('//', '/')
+  iframeSrc.value = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}` // Формируем URL для iframe
 }
 </script>
 
@@ -105,12 +122,14 @@ const setMenuItem = (menuKey: MenuItemKey) => {
 
 
 .iframe {
-  margin-top: var(--header-height);
-  margin-left: var(--left-sidebar-collapse-width);
-  margin-right: 0;
+  margin: var(--header-height) auto -3px var(--left-sidebar-collapse-width);
+  width: calc(100% - var(--left-sidebar-collapse-width));
+  height: calc(100vh - var(--header-height));
+  border: none;
+  box-sizing: border-box;
   transition: margin-right 0.1s ease;
 }
 .iframe.short {
-  margin-right: var(--right-sidebar-width);
+  width: calc(100% - var(--right-sidebar-width) - var(--left-sidebar-collapse-width));
 }
 </style>
