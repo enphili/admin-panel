@@ -1,7 +1,3 @@
-<script setup lang="ts">
-
-</script>
-
 <template>
   <svg
     width="17.000000"
@@ -20,7 +16,3 @@
     />
   </svg>
 </template>
-
-<style scoped>
-
-</style>

@@ -42,6 +42,10 @@ import EditeImg from '../components/rightSideBar/EditeImg.vue'
 import Settings from '../components/rightSideBar/Settings.vue'
 import {ref} from 'vue'
 
+defineEmits<{
+  authenticated: [value: boolean]
+}>()
+
 const isRightSideBarActive = ref(false)
 const menuItems = {
   SelectPage,
