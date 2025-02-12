@@ -42,7 +42,7 @@ import AppModalDialog from './ui/AppModalDialog.vue'
 import { useNotification } from "@kyvg/vue3-notification"
 import {useInitTheme, useToggleTheme} from '../use/theme.ts'
 import { useAppStore } from '../store'
-import {ref} from 'vue'
+import { ref} from 'vue'
 import {SettingsService} from '../service/SettingsService.ts'
 import {AuthService} from '../service/AuthService.ts'
 
@@ -59,8 +59,7 @@ const { notify }  = useNotification()
 const showLogoutConfirmation = ref(false)
 const logoutTitle = ref('')
 const logoutMessage = ref('')
-
-const isDarkMode = useInitTheme()
+const isDarkMode = ref(useInitTheme())
 
 // Функция выхода из системы
 const logoutAndRedirect = async () => {
@@ -148,6 +147,7 @@ const handleSave = async () => {
     })
   }
 }
+
 </script>
 
 <style>
