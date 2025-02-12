@@ -92,18 +92,21 @@ const loadPageInIframe = async (page: string) => {
   try {
     // Загружаем содержимое страницы через GET-запрос
     const htmlContent = await ApiService.getHtml(fullPath)
+    const fileName = normalizedPath.split('/').pop() || 'unknown.html'
 
     // Сохраняем содержимое во временный файл через POST-запрос
     const saveResponse = await ApiService.post<string>(
       'api/save_temp_page.php',
-      { html: htmlContent }
+      { html: htmlContent, fileName}
     )
 
-    const tempFile = saveResponse.data
+    if (!saveResponse.data) {
+      throw new Error('Не удалось сохранить временный файл')
+    }
 
     // Загружаем временный файл в iframe
     if (!adminIframe.value) throw new Error('iframe не найден')
-    await useLoadIframe(adminIframe.value, tempFile)
+    await useLoadIframe(adminIframe.value, saveResponse.data)
   }
   catch (error) {
     useHandleError(error, 'Редактируемая страница', 'error')

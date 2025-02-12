@@ -22,11 +22,12 @@ if (!isset($_SESSION['isLogin']) || !$_SESSION['isLogin']) {
 // Получаем данные из тела запроса
 $data = json_decode(file_get_contents('php://input'), true);
 $html = $data['html'] ?? '';
+$originalFileName = $data['fileName'] ?? '';
 
-if (empty($html)) {
+if (empty($html) || empty($originalFileName)) {
     echo json_encode([
         'success' => false,
-        'message' => 'HTML-контент не передан',
+        'message' => 'HTML-контент или имя файла не переданы',
     ]);
     exit;
 }
@@ -41,8 +42,35 @@ if (!$rootDirectory || !is_dir($rootDirectory)) {
     exit;
 }
 
-// Создаём временный файл в корне сайта
-$tempFile = $rootDirectory . '/temp-page-' . uniqid() . '.html';
+// Создаём уникальное имя для временной папки
+$tempDirName = '!temp-ba9818';
+
+// Полный путь к временной папке
+$tempDir = $rootDirectory . DIRECTORY_SEPARATOR . $tempDirName;
+
+// Создаём временную папку, если её ещё нет
+if (!is_dir($tempDir)) {
+    mkdir($tempDir, 0755, true);
+}
+
+// Формируем шаблон имени временного файла
+$tempFileName = pathinfo($originalFileName, PATHINFO_FILENAME) . '-temp-' . uniqid() . '.html';
+$tempFile = $tempDir . DIRECTORY_SEPARATOR . $tempFileName;
+
+// Проверяем, существует ли уже временный файл для этого оригинального файла
+$existingFiles = glob($tempDir . DIRECTORY_SEPARATOR . pathinfo($originalFileName, PATHINFO_FILENAME) . '-temp-*.html');
+if (!empty($existingFiles)) {
+    // Если найден существующий файл, используем его
+    $tempFilePath = str_replace($rootDirectory, '', $existingFiles[0]);
+    echo json_encode([
+        'success' => true,
+        'data' => $tempFilePath,
+        'message' => 'Используется существующий временный файл',
+    ]);
+    exit;
+}
+
+// Если временного файла нет, создаем новый
 if (file_put_contents($tempFile, $html) === false) {
     echo json_encode([
         'success' => false,
