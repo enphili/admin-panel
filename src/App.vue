@@ -4,12 +4,9 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, defineAsyncComponent} from 'vue'
+import {computed, ref, defineAsyncComponent, onMounted} from 'vue'
 import { useInitTheme } from './use/theme.ts'
 import {Notifications} from '@kyvg/vue3-notification'
-
-// Инициализация темы при старте приложения
-useInitTheme()
 
 // Динамическая загрузка компонентов
 const AuthLayout = defineAsyncComponent(() => import('./layout/AuthLayout.vue'))
@@ -25,6 +22,11 @@ const currentComponent = computed(() => (isAuthenticated.value ? MainLayout : Au
 const handleAuthentication = (authenticated: boolean) => {
   isAuthenticated.value = authenticated
 }
+
+onMounted(() => {
+  // Инициализация темы при старте приложения
+  useInitTheme()
+})
 </script>
 
 <style>
