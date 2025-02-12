@@ -1,6 +1,6 @@
-import { useValidation  } from '../use/auth/useValidation.ts'
+import { useValidation  } from '../use/auth/validation.ts'
 import { CsrfManager } from './CsrfManager.ts'
-import { handleError } from '../use/useHandleError.ts'
+import { useHandleError } from '../use/handleError.ts'
 
 type EmitFunction = (event: 'authenticated', payload: boolean) => void
 
@@ -106,7 +106,7 @@ export class AuthService {
       return true // Выход успешен
     }
     catch (error) {
-      handleError(error, 'Выход из системы', 'error')
+      useHandleError(error, 'Выход из системы', 'error')
       throw error
     }
   }

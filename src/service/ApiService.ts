@@ -1,5 +1,5 @@
 import { CsrfManager } from './CsrfManager.ts'
-import { handleError } from '../use/useHandleError.ts'
+import { useHandleError } from '../use/handleError.ts'
 import type {ApiResponse} from '../types/apiResponse.ts'
 
 export class ApiService {
@@ -36,7 +36,7 @@ export class ApiService {
       return data
     }
     catch (error) {
-      handleError(error, 'GET-запрос', 'error')
+      useHandleError(error, 'GET-запрос', 'error')
       throw error
     }
   }
@@ -68,7 +68,7 @@ export class ApiService {
       return data
     }
     catch (error) {
-      handleError(error, 'POST-запрос', 'error')
+      useHandleError(error, 'POST-запрос', 'error')
       throw error
     }
   }
@@ -91,9 +91,8 @@ export class ApiService {
       return await response.text()
     }
     catch (error) {
-      handleError(error, 'GET-запрос', 'error')
+      useHandleError(error, 'GET-запрос', 'error')
       throw error
     }
   }
 }
-

@@ -17,7 +17,7 @@
             type="checkbox"
             id="theme-switch"
             v-model="isDarkMode"
-            @change="toggleTheme(isDarkMode)"
+            @change="useToggleTheme(isDarkMode)"
           />
           <span class="slider"></span>
         </label>
@@ -40,7 +40,7 @@
 import AppButton from './ui/AppButton.vue'
 import AppModalDialog from './ui/AppModalDialog.vue'
 import { useNotification } from "@kyvg/vue3-notification"
-import {initTheme, toggleTheme} from '../use/useTheme.ts'
+import {useInitTheme, useToggleTheme} from '../use/theme.ts'
 import { useAppStore } from '../store'
 import {ref} from 'vue'
 import {SettingsService} from '../service/SettingsService.ts'
@@ -60,7 +60,7 @@ const showLogoutConfirmation = ref(false)
 const logoutTitle = ref('')
 const logoutMessage = ref('')
 
-const isDarkMode = initTheme()
+const isDarkMode = useInitTheme()
 
 // Функция выхода из системы
 const logoutAndRedirect = async () => {

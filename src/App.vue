@@ -5,11 +5,11 @@
 
 <script setup lang="ts">
 import {computed, ref, defineAsyncComponent} from 'vue'
-import { initTheme } from './use/useTheme.ts'
+import { useInitTheme } from './use/theme.ts'
 import {Notifications} from '@kyvg/vue3-notification'
 
 // Инициализация темы при старте приложения
-initTheme()
+useInitTheme()
 
 // Динамическая загрузка компонентов
 const AuthLayout = defineAsyncComponent(() => import('./layout/AuthLayout.vue'))

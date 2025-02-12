@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { ApiService } from '../../service/ApiService.ts'
-import {handleError} from '../../use/useHandleError.ts'
+import {useHandleError} from '../../use/handleError.ts'
 import type {ApiResponse} from '../../types/apiResponse.ts'
 
 const emit = defineEmits<{
@@ -27,7 +27,7 @@ const fetchPages = async () => {
     const response: ApiResponse<string[]> = await ApiService.get('api/get_pages.php') // Обновляем список страниц
     pages.value = response.data
   } catch (error) {
-    handleError(error, 'Список страниц', 'error')
+    useHandleError(error, 'Список страниц', 'error')
   }
 }
 

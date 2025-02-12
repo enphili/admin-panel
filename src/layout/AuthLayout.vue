@@ -53,11 +53,11 @@
 <script setup lang="ts">
 import AppButton from '../components/ui/AppButton.vue'
 import {computed, onMounted, ref} from 'vue'
-import {useValidation} from '../use/auth/useValidation.ts'
+import {useValidation} from '../use/auth/validation.ts'
 import {AuthService} from '../service/AuthService.ts'
 import { useNotification } from "@kyvg/vue3-notification"
 import { useAppStore } from '../store'
-import {handleError} from '../use/useHandleError.ts'
+import {useHandleError} from '../use/handleError.ts'
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
@@ -126,7 +126,7 @@ const handleLogin = async () => {
     }
   }
   catch (error) {
-    authErrorMessage.value = handleError(error, 'Авторизация', 'error')
+    authErrorMessage.value = useHandleError(error, 'Авторизация', 'error')
     setTimeout(() => authErrorMessage.value = '', 2500)
   }
   finally {

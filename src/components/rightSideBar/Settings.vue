@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import {useAppStore} from '../../store'
 import {computed, onMounted, ref, watch} from 'vue'
-import {useValidation} from '../../use/auth/useValidation.ts'
+import {useValidation} from '../../use/auth/validation.ts'
 
 const store = useAppStore() //
 const pathErrorMessage = ref('')

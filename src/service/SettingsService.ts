@@ -1,5 +1,5 @@
 import { CsrfManager } from './CsrfManager.ts'
-import { handleError } from '../use/useHandleError.ts'
+import { useHandleError } from '../use/handleError.ts'
 
 export class SettingsService {
   private static csrfManager = new CsrfManager()
@@ -32,7 +32,7 @@ export class SettingsService {
       }
     }
     catch (error) {
-      handleError(error, 'Сохранение настроек', 'error')
+      useHandleError(error, 'Сохранение настроек', 'error')
       throw error
     }
   }

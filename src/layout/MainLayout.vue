@@ -40,8 +40,9 @@ import EditeText from '../components/rightSideBar/EditeText.vue'
 import EditeImg from '../components/rightSideBar/EditeImg.vue'
 import Settings from '../components/rightSideBar/Settings.vue'
 import {ref} from 'vue'
-import {handleError} from '../use/useHandleError.ts'
+import {useHandleError} from '../use/handleError.ts'
 import { ApiService } from '../service/ApiService.ts'
+import {useLoadIframe} from '../use/loadIframe.ts'
 
 defineEmits<{
   authenticated: [value: boolean]
@@ -82,34 +83,6 @@ const setMenuItem = (menuKey: MenuItemKey) => {
   }
 }
 
-// Метод для загрузки iframe
-const loadIframe = (iframe: HTMLIFrameElement, url: string): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    try {
-      iframe.src = url + "?hash=" + crypto.randomUUID()
-    }
-    catch(error) {
-      reject(error)
-    }
-
-    const maxTime = 60000
-    const interval = 200
-    let timerCount = 0
-
-    const timer = setInterval(() => {
-      if (!iframe.contentDocument || iframe.contentDocument.readyState === 'complete') {
-        clearInterval(timer)
-        resolve()
-      }
-      else if (timerCount * interval > maxTime) {
-        clearInterval(timer)
-        reject(new  Error('Не удалось загрузить iframe'))
-      }
-      timerCount++
-    }, interval)
-  })
-}
-
 // Загружаем выбранную страницу в iframe
 const loadPageInIframe = async (page: string) => {
   // Нормализуем путь: заменяем \ на / и убираем лишние символы
@@ -130,10 +103,10 @@ const loadPageInIframe = async (page: string) => {
 
     // Загружаем временный файл в iframe
     if (!adminIframe.value) throw new Error('iframe не найден')
-    await loadIframe(adminIframe.value, tempFile)
+    await useLoadIframe(adminIframe.value, tempFile)
   }
   catch (error) {
-    handleError(error, 'Редактируемая страница', 'error')
+    useHandleError(error, 'Редактируемая страница', 'error')
   }
 }
 

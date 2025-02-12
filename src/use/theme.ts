@@ -1,4 +1,4 @@
-const toggleTheme = (isDarkMode: boolean): void => {
+const useToggleTheme = (isDarkMode: boolean): void => {
   if (isDarkMode) {
     document.documentElement.classList.add('dark')
     localStorage.setItem('theme', 'dark')
@@ -8,7 +8,7 @@ const toggleTheme = (isDarkMode: boolean): void => {
   }
 }
 
-const initTheme = (): boolean => {
+const useInitTheme = (): boolean => {
   const savedTheme: string | null = localStorage.getItem('theme')
   if (savedTheme === 'dark') {
     document.documentElement.classList.add('dark')
@@ -20,4 +20,4 @@ const initTheme = (): boolean => {
 }
 
 
-export { toggleTheme, initTheme }
+export { useToggleTheme, useInitTheme }
