@@ -2,7 +2,6 @@ import {notify} from '@kyvg/vue3-notification'
 
 const useToggleTheme = (isDarkMode: boolean): void => {
   try {
-    const themeClass = isDarkMode ? 'dark' : ''
     const storedTheme = isDarkMode ? 'dark' : 'light'
     
     document.documentElement.classList.toggle('dark', isDarkMode)
