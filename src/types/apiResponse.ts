@@ -1,5 +1,5 @@
-export interface ApiResponse<T> {
+export interface ApiResponse<T = undefined> {
   success: boolean
   message?: string // Опциональное поле для сообщений об ошибках
-  data: T         // Данные, которые зависят от контекста запроса
+  data?: T         // Данные, которые зависят от контекста запроса
 }
