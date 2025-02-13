@@ -53,6 +53,9 @@ if (!is_dir($tempDir)) {
     mkdir($tempDir, 0755, true);
 }
 
+// Очищаем имя файла от недопустимых символов
+$safeFileName = preg_replace('/[^a-zA-Z0-9._\-]/', '_', basename($originalFileName));
+
 // Формируем шаблон имени временного файла
 $tempFileName = pathinfo($originalFileName, PATHINFO_FILENAME) . '-temp-' . uniqid() . '.html';
 $tempFile = $tempDir . DIRECTORY_SEPARATOR . $tempFileName;
@@ -81,6 +84,9 @@ if (file_put_contents($tempFile, $html) === false) {
 
 // Возвращаем путь к временному файлу относительно корня сайта
 $tempFilePath = str_replace($rootDirectory, '', $tempFile);
+
+// Убираем начальный слеш, если он есть
+$tempFilePath = ltrim($tempFilePath, '/');
 
 echo json_encode([
     'success' => true,
