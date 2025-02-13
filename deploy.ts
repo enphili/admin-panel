@@ -5,7 +5,7 @@ import { exec } from 'child_process'
 const PROJECT_PATH = path.resolve(__dirname) // Путь к корню проекта
 const DIST_PATH = path.join(PROJECT_PATH, 'dist') // Путь к папке билда
 const BACKEND_SOURCE = path.resolve(PROJECT_PATH, 'backend') // Путь к исходной папке PHP API
-const FRONTEND_DEST = path.join('K:', 'OSPanel', 'home', 'proremont.com', 'admin') // Путь к директории OpenServer, где находится сайт-донор
+const FRONTEND_DEST = path.join('K:', 'OSPanel', 'home', 'proremont.com', 'admin') // Путь к директории OpenServer, где находится приложение для сайта-донора
 const BACKEND_DEST = path.join(FRONTEND_DEST, 'api') // Папка для backend на сайте на OpenServer
 
 // Функция для выполнения команд в терминале
@@ -17,11 +17,11 @@ const runCommand = (cmd: string): Promise<void> => {
         console.error(`STDOUT: ${stdout}`)
         console.error(`STDERR: ${stderr}`)
         reject(error)
-      } else {
-        console.log(stdout)
-        console.log(`✅ Команда "${cmd}" выполнена успешно.`)
-        resolve()
       }
+      
+      console.log(stdout)
+      console.log(`✅ Команда "${cmd}" выполнена успешно.`)
+      resolve()
     })
   })
 }
@@ -30,7 +30,8 @@ const runCommand = (cmd: string): Promise<void> => {
 const copyFiles = async (source: string, destination: string, filter?: (file: string) => boolean) => {
   if (!fs.existsSync(source)) {
     console.error(`❌ Исходная папка не найдена: ${source}`)
-    return
+    throw new Error(`Исходная папка не найдена: ${source}`)
+    
   }
   
   if (!fs.existsSync(destination)) {
@@ -67,10 +68,11 @@ const deploy = async () => {
     } else {
       console.error(error)
     }
+    throw error
   }
 }
 
 // Запуск
 deploy()
-  .then(() => console.log('Deployment successful'))
-  .catch(err => console.error('Deployment failed:', err))
+  .then(() => console.log('✅ Success!'))
+  .catch(err => console.error('❌ Error!:', err))
