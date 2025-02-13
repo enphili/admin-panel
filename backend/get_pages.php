@@ -41,7 +41,7 @@ if (!$directory || !is_dir($directory)) {
  * @param string $excludedFolder
  * @return string[]
  */
-function getHtmlFiles(string $dir, string $rootDirectory, string $excludedFolder): array {
+function getHtmlFiles(string $dir, string $rootDirectory, array $excludedFolders): array {
     $htmlFiles = [];
     $items = scandir($dir);
 
@@ -57,14 +57,16 @@ function getHtmlFiles(string $dir, string $rootDirectory, string $excludedFolder
             continue;
         }
 
-        // Исключаем файлы из указанной папки приложения
-        if ($excludedFolder && strpos($path, DIRECTORY_SEPARATOR . $excludedFolder . DIRECTORY_SEPARATOR) !== false) {
-            continue;
+        // Исключаем файлы из указанных папок
+        foreach ($excludedFolders as $excludedFolder) {
+            if (strpos($path, DIRECTORY_SEPARATOR . $excludedFolder . DIRECTORY_SEPARATOR) !== false) {
+                continue 2; // Пропускаем этот файл/папку и переходим к следующему элементу
+            }
         }
 
         if (is_dir($path)) {
             // Рекурсивно обрабатываем поддиректории
-            $htmlFiles = array_merge($htmlFiles, getHtmlFiles($path, $rootDirectory, $excludedFolder));
+            $htmlFiles = array_merge($htmlFiles, getHtmlFiles($path, $rootDirectory, $excludedFolders));
         } elseif (pathinfo($item, PATHINFO_EXTENSION) === 'html') {
             // Добавляем полный путь относительно корневой директории
             $relativePath = str_replace($rootDirectory, '', $path);
@@ -75,9 +77,12 @@ function getHtmlFiles(string $dir, string $rootDirectory, string $excludedFolder
     return $htmlFiles;
 }
 
+// Определяем папки, которые нужно исключить
+$excludedFolders = [$adminFolderName, '!temp-ba9818'];
+
 // Получаем список HTML-файлов
 $maxFiles = 100; // Максимальное количество файлов
-$htmlFiles = getHtmlFiles($directory, $directory, $adminFolderName);
+$htmlFiles = getHtmlFiles($directory, $directory, $excludedFolders);
 $htmlFiles = array_slice($htmlFiles, 0, $maxFiles);
 
 // Возвращаем результат в формате JSON
