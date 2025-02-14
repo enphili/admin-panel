@@ -25,7 +25,7 @@ const pages = ref<string[]>([]) // Полные пути к файлам
 const fetchPages = async () => {
   try {
     const response: ApiResponse<string[]> = await ApiService.get('api/get_pages.php') // Обновляем список страниц
-    pages.value = response.data
+    pages.value = response.data ?? []
   } catch (error) {
     useHandleError(error, 'Список страниц', 'error')
   }

@@ -39,10 +39,15 @@ import EditeHead from '../components/rightSideBar/EditeHead.vue'
 import EditeText from '../components/rightSideBar/EditeText.vue'
 import EditeImg from '../components/rightSideBar/EditeImg.vue'
 import Settings from '../components/rightSideBar/Settings.vue'
-import {ref} from 'vue'
-import {useHandleError} from '../use/handleError.ts'
+import { ref } from 'vue'
+import { useLoadIframe } from '../use/loadIframe.ts'
+import { useHandleError } from '../use/handleError.ts'
 import { ApiService } from '../service/ApiService.ts'
-import {useLoadIframe} from '../use/loadIframe.ts'
+import { DOMService } from '../service/DOMService.ts'
+import { TextService } from '../service/TextService'
+import { ImageService } from '../service/ImageService.ts'
+import {MetaService} from '../service/MetaService.ts'
+import {FaviconService} from '../service/FaviconService.ts'
 
 defineEmits<{
   authenticated: [value: boolean]
@@ -69,6 +74,7 @@ const operationTitle = {
   Settings: 'Настройки панели управления'
 }
 const adminIframe = ref<HTMLIFrameElement | null>(null)
+const virtualDOM = ref<Document | null>(null)
 
 // Устанавливаем текущий пункт меню
 const setMenuItem = (menuKey: MenuItemKey) => {
@@ -83,33 +89,111 @@ const setMenuItem = (menuKey: MenuItemKey) => {
   }
 }
 
-// Загружаем выбранную страницу в iframe
+// Метод для активации режима редактирования
+const enableEditing = () => {
+  if (!adminIframe.value || !virtualDOM.value) return
+  const iframeDoc = adminIframe.value.contentDocument
+  if (!iframeDoc) return
+
+  // Редактирование текста
+  iframeDoc.body.querySelectorAll<HTMLElement>('text-editor').forEach(element => {
+    const id = element.getAttribute('nodeId')
+    const virtualElement = virtualDOM.value!.body.querySelector<HTMLElement>(`[nodeId="${id}"]`)
+    if (id && virtualElement) {
+      new TextService(element, virtualElement)
+    }
+  })
+
+  // Редактирование изображений
+  iframeDoc.body.querySelectorAll<HTMLElement>('[imgId]').forEach(element => {
+    const id = element.getAttribute('imgId')
+    const virtualElement = virtualDOM.value!.body.querySelector<HTMLElement>(`[imgId="${id}"]`)
+    if (id && virtualElement) {
+      new ImageService(element, virtualElement)
+    }
+  })
+
+  // Редактирование метаданных
+  new MetaService(virtualDOM.value!)
+
+  // Редактирование favicons
+  new FaviconService(virtualDOM.value!)
+}
+
+// Метод для инъекций стилей
+const injectStyles = () => {
+  if (!adminIframe.value) return
+  const iframeDoc = adminIframe.value.contentDocument
+  if (!iframeDoc) return
+
+  const style = iframeDoc.createElement('style')
+  style.innerHTML = `
+    text-editor:hover {
+      outline: 3px solid orange;
+      outline-offset: 3px;
+    }
+    text-editor:focus {
+      outline: 3px solid red;
+      outline-offset: 3px;
+    }
+    [imgId]:hover {
+      outline: 3px solid orange;
+      outline-offset: 3px;
+    }
+    [imgId]:focus {
+      outline: 3px solid red;
+      outline-offset: 3px;
+    }
+  `
+  iframeDoc.head.appendChild(style)
+}
+
+// Загрузка выбранной страницу в iframe
 const loadPageInIframe = async (page: string) => {
-  // Нормализуем путь: заменяем \ на / и убираем лишние символы
-  const normalizedPath = page.replace(/\\/g, '/').replace('//', '/')
-  const fullPath = normalizedPath.startsWith('/') ? normalizedPath : `/${normalizedPath}` // Формируем URL для iframe
+  // Проверка наличия iframe
+  if (!adminIframe.value) {
+    useHandleError(new Error('iframe не найден'), `Загрузка страницы - ${page}`, 'error')
+    return
+  }
 
   try {
-    // Загружаем содержимое страницы через GET-запрос
-    const htmlContent = await ApiService.getHtml(fullPath)
-    const fileName = normalizedPath.split('/').pop() || 'unknown.html'
+    // Нормализация пути: замена \ на / и удаление лишних символов и формирование URL для iframe
+    const url = new URL(page, 'https://example')
+    url.searchParams.set('hash', crypto.randomUUID()) // добавление хеша для избегания кэширования запроса
+    const fileName = url.pathname.split('/').pop() || 'unknown.html'
 
-    // Сохраняем содержимое во временный файл через POST-запрос
-    const saveResponse = await ApiService.post<string>(
-      'api/save_temp_page.php',
-      { html: htmlContent, fileName}
-    )
+    // Получение и обработка HTML
+    const htmlContent = await ApiService.getHtml(url.pathname + url.search)
+    virtualDOM.value = DOMService.processDOM(htmlContent) // Сохраняем виртуальный DOM
 
-    if (!saveResponse.data) {
+    // Сохранение обработанного HTML во временный файл
+    const tempPageRes = await ApiService.post<string>('api/save_temp_page.php', {
+      html: DOMService.serializeDOMToStr(virtualDOM.value), // Сериализуем DOM обратно в строку HTML
+      fileName
+    })
+    const tempFilePath = tempPageRes.data || ''
+    if (!tempFilePath) {
+      console.error(`Не удалось сохранить временный файл для ${fileName}`)
       throw new Error('Не удалось сохранить временный файл')
     }
 
-    // Загружаем временный файл в iframe
-    if (!adminIframe.value) throw new Error('iframe не найден')
-    await useLoadIframe(adminIframe.value, saveResponse.data)
+    // Загрузка временного файла в iframe
+    await useLoadIframe(adminIframe.value, tempFilePath)
+
+    // Удаление временного файла на сервере
+    try {
+      await ApiService.post('api/delete_temp_page.php', { filePath: tempFilePath })
+    } catch (error) {
+      console.error(error, `Ошибка удаления временного файла: ${tempFilePath}`)
+      useHandleError(error, `Удаление файла`, 'warn')
+    }
+
+    enableEditing() // Активируем режим редактирования
+    injectStyles() // Инжектируем стили
+
   }
   catch (error) {
-    useHandleError(error, 'Редактируемая страница', 'error')
+    useHandleError(error, `Загрузка страницы - ${page}`, 'error')
   }
 }
 
@@ -149,8 +233,6 @@ const loadPageInIframe = async (page: string) => {
 .right-sidebar:hover::-webkit-scrollbar-thumb {
   background: var(--main-color-hover);
 }
-
-
 .iframe {
   margin: var(--header-height) auto -3px var(--left-sidebar-collapse-width);
   width: calc(100% - var(--left-sidebar-collapse-width));

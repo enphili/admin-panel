@@ -1,7 +1,7 @@
 export const useLoadIframe = (iframe: HTMLIFrameElement, url: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     try {
-      iframe.src = url + "?hash=" + crypto.randomUUID()
+      iframe.src = url
     }
     catch(error) {
       reject(error)

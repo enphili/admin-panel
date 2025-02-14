@@ -1,5 +1,4 @@
 export class DOMService {
-  
   // Парсим строки HTML в объект Document
   static parseStrToDOM(html: string): Document {
     const parser = new DOMParser()
@@ -153,5 +152,10 @@ export class DOMService {
     
     return dom
   }
+  
+  // Метод обработки DOM
+  static processDOM = (html: string) => {
+    let dom = this.parseStrToDOM(html) // Преобразуем строку HTML в объект DOM
+    return this.wrapImages(this.wrapTextNodes(dom)) // Оборачиваем текстовые узлы и изображения
+  }
 }
-
