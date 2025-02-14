@@ -34,6 +34,14 @@
     @confirm="confirmLogout"
     @close="showLogoutConfirmation = false"
   />
+
+  <AppModalDialog
+    :show-modal="showSaveConfirmation"
+    :title="saveTitle"
+    :message="saveMessage"
+    @confirm="confirmSave"
+    @close="showSaveConfirmation = false"
+  />
 </template>
 
 <script setup lang="ts">
@@ -61,6 +69,9 @@ const { notify }  = useNotification()
 const showLogoutConfirmation = ref(false)
 const logoutTitle = ref('')
 const logoutMessage = ref('')
+const showSaveConfirmation = ref(false)
+const saveTitle = ref('')
+const saveMessage = ref('')
 const isDarkMode = ref(useInitTheme())
 
 // Функция выхода из системы
@@ -98,17 +109,25 @@ const handleLogout = () => {
   }
 }
 
-const handleSave = async () => {
-  try {
-    if (!store.hasChanges) { // Проверка наличия изменений
-      notify({
-        title: 'Сохранение',
-        text: 'Нет изменений для сохранения',
-        type: 'warn',
-      })
-      return
-    }
+const handleSave = () => {
+  if (!store.hasChanges) { // Проверка наличия изменений
+    notify({
+      title: 'Сохранение',
+      text: 'Нет изменений для сохранения',
+      type: 'warn',
+    })
+    return
+  }
 
+  saveTitle.value = 'Подтверждение сохранения'
+  saveMessage.value = 'Вы действительно хотите сохранить изменения?'
+  showSaveConfirmation.value = true
+}
+
+const confirmSave  = async () => {
+  showSaveConfirmation.value = false
+
+  try {
     // Сбор данных для отправки
     const payload: Record<string, string> = {}
 
