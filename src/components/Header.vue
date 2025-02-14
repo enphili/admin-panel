@@ -3,8 +3,8 @@
     <div class="fl-row">
       <h2 class="header__title">Панель редактирования</h2>
       <div class="fl-row header__page-info">
-        <p class="header__page-title">Профессиональный ремонт квартир</p>
-        <p class="header__file-name">index.html</p>
+        <p v-if="pageTitle" class="header__page-title">{{ pageTitle }}</p>
+        <p class="header__file-name">{{ fileName }}</p>
       </div>
     </div>
     <h3 class="header__operation-title">
@@ -47,7 +47,9 @@ import {SettingsService} from '../service/SettingsService.ts'
 import {AuthService} from '../service/AuthService.ts'
 
 defineProps<{
-  operationTitle: string
+  operationTitle: string,
+  fileName: string,
+  pageTitle: string
 }>()
 
 const emit = defineEmits<{

@@ -1,6 +1,8 @@
 <template>
     <Header
       :operationTitle="operationTitle[currentMenuItem]"
+      :fileName="pageName"
+      :pageTitle="pageTitle"
     ></Header>
 
     <LeftSideBar
@@ -75,6 +77,8 @@ const operationTitle = {
 }
 const adminIframe = ref<HTMLIFrameElement | null>(null)
 const virtualDOM = ref<Document | null>(null)
+const pageName = ref<string>('')
+const pageTitle = ref<string>('')
 
 // Устанавливаем текущий пункт меню
 const setMenuItem = (menuKey: MenuItemKey) => {
@@ -162,9 +166,15 @@ const loadPageInIframe = async (page: string) => {
     url.searchParams.set('hash', crypto.randomUUID()) // добавление хеша для избегания кэширования запроса
     const fileName = url.pathname.split('/').pop() || 'unknown.html'
 
+    pageName.value = fileName // передаем название файла редактируемой страницы в header приложения
+
     // Получение и обработка HTML
     const htmlContent = await ApiService.getHtml(url.pathname + url.search)
     virtualDOM.value = DOMService.processDOM(htmlContent) // Сохраняем виртуальный DOM
+
+    if (virtualDOM.value) {
+      pageTitle.value = virtualDOM.value.title || '' // передаем title редактируемой страницы в header приложения
+    }
 
     // Сохранение обработанного HTML во временный файл
     const tempPageRes = await ApiService.post<string>('api/save_temp_page.php', {
