@@ -44,7 +44,7 @@ onMounted(() => {
   --left-sidebar-collapse-width: 60px;
   --left-sidebar-width: 190px;
   --right-sidebar-width: 240px;
-  --border-radius: 5px
+  --border-radius: 5px;
 }
 .dark {
   --main-color: rgb(44, 42, 64);

@@ -54,11 +54,15 @@ import { ref} from 'vue'
 import {SettingsService} from '../service/SettingsService.ts'
 import {AuthService} from '../service/AuthService.ts'
 
-defineProps<{
-  operationTitle: string,
-  fileName: string,
-  pageTitle: string
-}>()
+withDefaults(defineProps<{
+  operationTitle?: string,
+  fileName?: string,
+  pageTitle?: string
+}>(), {
+  operationTitle: 'Неизвестная операция',
+  fileName: '',
+  pageTitle: '',
+})
 
 const emit = defineEmits<{
   authenticated: [value: boolean]
