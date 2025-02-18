@@ -46,7 +46,6 @@ export class DOMService {
       ) {
         const wrapper = dom.createElement('text-editor')
         wrapper.setAttribute('nodeId', crypto.randomUUID()) // Генерация уникального ID
-        wrapper.contentEditable = 'true' // Добавляем атрибут для редактирования
         
         // Заменяем текстовый узел оберткой
         node.parentNode.replaceChild(wrapper, node)
