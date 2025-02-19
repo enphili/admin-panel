@@ -10,6 +10,8 @@ export class IframeService {
   pageName = ''
   pageTitle = ''
   
+  private textServices: TextService[] = []
+  
   constructor(private readonly iframe: HTMLIFrameElement) { }
   
   private async loadIframe(url: string): Promise<void> {
@@ -99,6 +101,7 @@ export class IframeService {
     if (!this.iframeDoc) return
     
     const style = this.iframeDoc.createElement('style')
+    style.id = 'text-editor-styles'
     style.innerHTML = `
       text-editor:hover, text-editor:focus {
         outline-offset: 1px;
@@ -122,6 +125,7 @@ export class IframeService {
     if (!this.iframeDoc) return
     
     const style = this.iframeDoc.createElement('style')
+    style.id = 'img-editor-styles' // Уникальный идентификатор для стилей
     style.innerHTML = `
       [imgId]:hover {
         outline: 2px solid orange;
@@ -169,6 +173,7 @@ export class IframeService {
   // метод для активации режима редактирования текста
   enableTextEditing(): void {
     if (!this.iframeDoc) return
+    if (!this.virtualDOM) return
     
     // Включаем инъекцию стилей и активацию сервисов
     this.injectTextStyles()
@@ -178,7 +183,8 @@ export class IframeService {
       const id = element.getAttribute('nodeId')
       const virtualElement = this.virtualDOM!.body.querySelector<HTMLElement>(`[nodeId="${id}"]`)
       if (id && virtualElement) {
-        new TextService(element, virtualElement)
+        const textService = new TextService(element, virtualElement)
+        this.textServices.push(textService)
       }
     })
   }
@@ -186,6 +192,7 @@ export class IframeService {
   // метод для активации режима редактирования изображений
   enableImgEditing(): void {
     if (!this.iframeDoc) return
+    if (!this.virtualDOM) return
     
     // Включаем инъекцию стилей и активацию сервисов
     this.injectImgStyles()
@@ -200,8 +207,24 @@ export class IframeService {
     })
   }
   
+  // метод для деактивации режима редактирования текста
+  disableTextEditing(): void {
+    if (!this.iframeDoc) return
+    
+    // Удаляем стили для редактирования текста
+    const textEditorStyle = this.iframeDoc.querySelector('style#text-editor-styles')
+    if (textEditorStyle) {
+      textEditorStyle.remove()
+    }
+    
+    // Уничтожаем все экземпляры TextService
+    this.textServices.forEach(service => service.destroy())
+    this.textServices = []
+  }
+  
   // Очистка ссылок, обработчиков и прочего перед удалением экземпляра
   destroy(): void {
     if (this.iframeDoc) this.iframeDoc = null
+    if (this.virtualDOM) this.virtualDOM = null
   }
 }

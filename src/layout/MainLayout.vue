@@ -10,7 +10,7 @@
       @selectBackups="setMenuItem('SelectBackups')"
       @editeHead="setMenuItem('EditeHead')"
       @editeText="activateTextEditing"
-      @editeImg="setMenuItem('EditeImg')"
+      @editeImg="activateImgEditing"
       @goToSettings="setMenuItem('Settings')"
       :currentMenuItem
     />
@@ -101,6 +101,15 @@ const activateTextEditing = async () => {
   if (!iframeService.value) return
 
   iframeService.value.enableTextEditing()
+}
+
+const activateImgEditing = () => {
+  setMenuItem('EditeImg')
+
+  if (!adminIframe.value) return
+  if (!iframeService.value) return
+
+  iframeService.value.disableTextEditing()
 }
 
 </script>
