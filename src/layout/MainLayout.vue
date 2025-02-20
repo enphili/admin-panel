@@ -6,12 +6,12 @@
     ></Header>
 
     <LeftSideBar
-      @selectPage="setMenuItem('SelectPage')"
-      @selectBackups="setMenuItem('SelectBackups')"
-      @editeHead="setMenuItem('EditeHead')"
+      @selectPage="activateSelectPageMode"
+      @selectBackups="activateRestoreBackupMode"
+      @editeHead="activateHeadEditing"
       @editeText="activateTextEditing"
       @editeImg="activateImgEditing"
-      @goToSettings="setMenuItem('Settings')"
+      @goToSettings="activateSettingMode"
       :currentMenuItem
     />
 
@@ -42,11 +42,11 @@ import EditeText from '../components/rightSideBar/EditeText.vue'
 import EditeImg from '../components/rightSideBar/EditeImg.vue'
 import Settings from '../components/rightSideBar/Settings.vue'
 import {computed, ref} from 'vue'
-import {IframeService} from '../service/IframeService.ts'
-import {useHandleError} from '../use/handleError.ts'
+import { useAppStore } from '../store'
 
 defineEmits<{ authenticated: [value: boolean] }>()
 
+const state = useAppStore()
 const isRightSideBarActive = ref(false)
 const menuItems = { SelectPage, SelectBackups, EditeHead, EditeText, EditeImg, Settings }
 const currentMenuItem = ref<keyof typeof menuItems | ''>('')
@@ -65,51 +65,62 @@ const operationTitle = computed(() => ({
   Settings: 'Настройки панели управления'
 }[currentMenuItem.value] || ''))
 
-const iframeService = ref<IframeService | null>(null)
-
 // Устанавливаем текущий пункт меню
 const setMenuItem = (menuKey: keyof typeof menuItems) => {
   currentMenuItem.value = currentMenuItem.value === menuKey ? '' : menuKey
     isRightSideBarActive.value = !!currentMenuItem.value
 }
 
+// загрузка выбранной страницы в iframe
 const loadPageInIframe = async (page: string) => {
   if (!adminIframe.value) return
-
-  // Уничтожаем старый экземпляр перед созданием нового
-  if (iframeService.value) {
-    iframeService.value.destroy()
-    iframeService.value = null
-  }
-
-  iframeService.value = new IframeService(adminIframe.value)
-
-  try {
-    await iframeService.value.loadPage(page)
-    pageName.value = iframeService.value.pageName
-    pageTitle.value = iframeService.value.pageTitle
-  }
-  catch (error) {
-    useHandleError(error, 'Загрузка во фрейм', 'error')
-  }
+  state.createIframeService(adminIframe.value)
+  await state.loadPageInIframe(page)
+  pageName.value = state.iframeService?.pageName || ''
+  pageTitle.value = state.iframeService?.pageTitle || ''
 }
 
+// деактивация режима редактирования
+const deactivateEditMode = (mode: 'text' | 'img' | 'all') => {
+  state.deactivateEditMode(mode)
+}
+
+// активация режима выбора редактируемой страницы
+const activateSelectPageMode = () => {
+  setMenuItem('SelectPage')
+  deactivateEditMode('all')
+}
+
+// активация режима восстановления страницы из backups
+const activateRestoreBackupMode = () => {
+  setMenuItem('SelectBackups')
+  deactivateEditMode('all')
+}
+
+// активация режима редактирования раздела head
+const activateHeadEditing = () => {
+  setMenuItem('EditeHead')
+  deactivateEditMode('all')
+}
+
+// активация режима редактирования теста
 const activateTextEditing = async () => {
   setMenuItem('EditeText')
+  deactivateEditMode('img')
 
-  if (!adminIframe.value) return
-  if (!iframeService.value) return
-
-  iframeService.value.enableTextEditing()
+  state.iframeService?.enableTextEditing()
 }
 
+// активация режима редактирования изображений
 const activateImgEditing = () => {
   setMenuItem('EditeImg')
+  deactivateEditMode('text')
+}
 
-  if (!adminIframe.value) return
-  if (!iframeService.value) return
-
-  iframeService.value.disableTextEditing()
+// активация режима настроек приложения
+const activateSettingMode = () => {
+  setMenuItem('Settings')
+  deactivateEditMode('all')
 }
 
 </script>
