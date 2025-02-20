@@ -101,7 +101,6 @@ const isCollapse = ref(false)
 const collapse = () => isCollapse.value = !isCollapse.value
 </script>
 
-
 <style >
 .sidebar {
   position: fixed;

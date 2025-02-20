@@ -25,13 +25,11 @@ export class ApiService {
       
       const response = await fetch(endpoint, options)
       if (!response.ok) {
-        console.error(`Ошибка HTTP! Статус: ${response.status}, URL: ${endpoint}`)
         throw new Error(`Ошибка HTTP! Статус: ${response.status}`)
       }
       
       const data: ApiResponse<T> = await response.json()
       if (!data.success) {
-        console.error(`Запрос к ${endpoint} не удался: ${data.message || response.status}`)
         throw new Error(`Запрос не удался: ${data.message || response.status}`)
       }
       
