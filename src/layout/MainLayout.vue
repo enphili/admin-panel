@@ -12,7 +12,7 @@
       @editeText="activateTextEditing"
       @editeImg="activateImgEditing"
       @goToSettings="activateSettingMode"
-      :currentMenuItem
+      :currentMenuItem="currentMenuItem"
     />
 
     <iframe
@@ -42,11 +42,11 @@ import EditeText from '../components/rightSideBar/EditeText.vue'
 import EditeImg from '../components/rightSideBar/EditeImg.vue'
 import Settings from '../components/rightSideBar/Settings.vue'
 import {computed, ref} from 'vue'
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/appStore.ts'
 
 defineEmits<{ authenticated: [value: boolean] }>()
 
-const state = useAppStore()
+const appState = useAppStore()
 const isRightSideBarActive = ref(false)
 const menuItems = { SelectPage, SelectBackups, EditeHead, EditeText, EditeImg, Settings }
 const currentMenuItem = ref<keyof typeof menuItems | ''>('')
@@ -74,53 +74,47 @@ const setMenuItem = (menuKey: keyof typeof menuItems) => {
 // загрузка выбранной страницы в iframe
 const loadPageInIframe = async (page: string) => {
   if (!adminIframe.value) return
-  state.createIframeService(adminIframe.value)
-  await state.loadPageInIframe(page)
-  pageName.value = state.iframeService?.pageName || ''
-  pageTitle.value = state.iframeService?.pageTitle || ''
-}
-
-// деактивация режима редактирования
-const deactivateEditMode = (mode: 'text' | 'img' | 'all') => {
-  state.deactivateEditMode(mode)
+  appState.createIframeService(adminIframe.value)
+  await appState.loadPageInIframe(page)
+  pageName.value = appState.iframeService?.pageName || ''
+  pageTitle.value = appState.iframeService?.pageTitle || ''
 }
 
 // активация режима выбора редактируемой страницы
 const activateSelectPageMode = () => {
   setMenuItem('SelectPage')
-  deactivateEditMode('all')
+  appState.deactivateEditMode('all')
 }
 
 // активация режима восстановления страницы из backups
 const activateRestoreBackupMode = () => {
   setMenuItem('SelectBackups')
-  deactivateEditMode('all')
+  appState.deactivateEditMode('all')
 }
 
 // активация режима редактирования раздела head
 const activateHeadEditing = () => {
   setMenuItem('EditeHead')
-  deactivateEditMode('all')
+  appState.deactivateEditMode('all')
 }
 
 // активация режима редактирования теста
 const activateTextEditing = async () => {
   setMenuItem('EditeText')
-  deactivateEditMode('img')
-
-  state.iframeService?.enableTextEditing()
+  appState.deactivateEditMode('img')
+  appState.activateEditMode('text')
 }
 
 // активация режима редактирования изображений
 const activateImgEditing = () => {
   setMenuItem('EditeImg')
-  deactivateEditMode('text')
+  appState.deactivateEditMode('text')
 }
 
 // активация режима настроек приложения
 const activateSettingMode = () => {
   setMenuItem('Settings')
-  deactivateEditMode('all')
+  appState.deactivateEditMode('all')
 }
 
 </script>

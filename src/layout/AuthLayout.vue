@@ -73,7 +73,7 @@ import {computed, onMounted, ref} from 'vue'
 import {useValidation} from '../use/auth/validation.ts'
 import {AuthService} from '../service/AuthService.ts'
 import { useNotification } from "@kyvg/vue3-notification"
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/appStore.ts'
 import {useHandleError} from '../use/handleError.ts'
 
 const emit = defineEmits<{

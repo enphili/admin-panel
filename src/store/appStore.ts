@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { AuthService } from '../service/AuthService.ts'
 import { IframeService } from '../service/IframeService.ts'
-import {useHandleError} from '../use/handleError.ts'
+import { TextService } from '../service/TextService.ts'
+import { ImageService } from '../service/ImageService.ts'
+import { useHandleError } from '../use/handleError.ts'
 
 interface State {
   hasChanges: boolean
@@ -17,9 +19,12 @@ interface State {
   }
   csrfToken: string
   iframeService: IframeService | null
+  textService: TextService | null
+  imageService: ImageService | null
   // ... будет дополняться полями
 }
 
+// Создание экземпляра AuthService
 const authService = new AuthService()
 
 export const useAppStore = defineStore('appState', {
@@ -36,7 +41,9 @@ export const useAppStore = defineStore('appState', {
       password: ''
     },
     csrfToken: '',
-    iframeService: null
+    iframeService: null,
+    textService: null,
+    imageService: null,
   }),
   
   getters: {},
@@ -76,7 +83,7 @@ export const useAppStore = defineStore('appState', {
       this.iframeService = new IframeService(iframeElement)
     },
     
-    // уничтожение старого экземпляр IframeService
+    // уничтожение старого экземпляра IframeService
     destroyIframeService() {
       if (this.iframeService) {
         this.iframeService.destroy()
@@ -95,21 +102,39 @@ export const useAppStore = defineStore('appState', {
       }
     },
     
+    // создание нового экземпляра TextService
+    createTextService(): TextService {
+      if (!this.textService) this.textService = new TextService()
+      return <TextService>this.textService
+    },
+    
+    // создание нового экземпляра ImageService
+    createImageService(): ImageService {
+      if (!this.imageService) this.imageService = new ImageService()
+      return this.imageService
+    },
+    
+    // активация режима редактирования
+    activateEditMode(type: 'text' | 'img') {
+      if (!this.iframeService) return
+      
+      const service = type === 'text'
+      ? this.createTextService()
+      : this.createImageService()
+      
+      this.iframeService.enableEditing(type, service)
+    },
+    
     // деактивация режима редактирования
     deactivateEditMode(mode: 'text' | 'img' | 'all') {
       if (!this.iframeService) return
-      
-      const modeActions = {
-        text: () => this.iframeService!.disableTextEditing(),
-        img: () => this.iframeService!.disableImgEditing(),
-        all: () => {
-          this.iframeService!.disableTextEditing()
-          this.iframeService!.disableImgEditing()
-        }
+
+      if (mode === 'all') {
+        this.iframeService.disableEditing('text')
+        this.iframeService.disableEditing('img')
+      } else {
+        this.iframeService.disableEditing(mode)
       }
-      
-      modeActions[mode]?.()
     },
-    
   }
 })

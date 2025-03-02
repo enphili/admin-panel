@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import {useAppStore} from '../../store'
+import {useAppStore} from '../../store/appStore.ts'
 import {computed, onMounted, ref, watch} from 'vue'
 import {useValidation} from '../../use/auth/validation.ts'
 

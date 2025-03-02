@@ -49,7 +49,7 @@ import AppButton from './ui/AppButton.vue'
 import AppModalDialog from './ui/AppModalDialog.vue'
 import { useNotification } from "@kyvg/vue3-notification"
 import {useInitTheme, useToggleTheme} from '../use/theme.ts'
-import { useAppStore } from '../store'
+import { useAppStore } from '../store/appStore.ts'
 import { ref} from 'vue'
 import {SettingsService} from '../service/SettingsService.ts'
 import {AuthService} from '../service/AuthService.ts'
